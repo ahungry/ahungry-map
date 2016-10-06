@@ -12,12 +12,12 @@
  */
 class MapLine
 {
+public:
   std::string type;
   SDL_Point point1;
   SDL_Point point2;
   double z1, z2;
   int r, g, b;
-public:
   /**
    * Load in a line of values, parse and store as necessary
    */

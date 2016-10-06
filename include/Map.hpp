@@ -12,15 +12,22 @@
  */
 class Map
 {
-  std::vector<MapLine*> mapLines;
+  bool has_loaded_lines = false;
+  std::vector<MapLine*> map_lines;
 public:
   double scale = .3;
   int x_offset = 0;
   int y_offset = 0;
   int x_offset_increment = 50;
   int y_offset_increment = 50;
-  Map();
-  void addLine(MapLine *mapLine);
+  Map ();
+  void addLine (MapLine *mapLine);
+  uint lineSize ();
+  bool isLoaded ();
+  double getX1 (int n);
+  double getY1 (int n);
+  double getX2 (int n);
+  double getY2 (int n);
 };
 
 Map::Map()
@@ -28,9 +35,40 @@ Map::Map()
   std::cout << " map init " << std::endl;
 }
 
-void Map::addLine (MapLine *mapLine)
+void Map::addLine (MapLine *map_line)
 {
-  mapLines.push_back (mapLine);
+  has_loaded_lines = true;
+  map_lines.push_back (map_line);
+}
+
+uint Map::lineSize ()
+{
+  return map_lines.size ();
+}
+
+bool Map::isLoaded ()
+{
+  return has_loaded_lines;
+}
+
+double Map::getX1 (int n)
+{
+  return scale * (map_lines[n]->point1.x + x_offset);
+}
+
+double Map::getY1 (int n)
+{
+  return scale * (map_lines[n]->point1.y + y_offset);
+}
+
+double Map::getX2 (int n)
+{
+  return scale * (map_lines[n]->point2.x + x_offset);
+}
+
+double Map::getY2 (int n)
+{
+  return scale * (map_lines[n]->point2.y + y_offset);
 }
 
 #endif

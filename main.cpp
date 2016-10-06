@@ -136,6 +136,7 @@ void setMapSingletons ()
       mapPoints.push_back (p);
 
       // Load up a new MapLine instance after converting all the line values
+      // Barf, need a way to dynamically apply same function set to all values (missing lisp!)
       MapLine *mapLine = new MapLine (
                                       t,
                                       atof(x1.c_str ()),
@@ -167,7 +168,7 @@ void setMapSingletons ()
  */
 void renderMapPoints (SDL_Renderer *ren)
 {
-  if (singletonMapPoint == nullptr)
+  if (! MAP.isLoaded ())
     {
       setMapSingletons ();
     }
@@ -179,15 +180,15 @@ void renderMapPoints (SDL_Renderer *ren)
 
   SDL_SetRenderDrawColor (ren, 0xFF, 0xFF, 0xFF, 0xFF);
 
-  for (uint i = 0; i < singletonMapPointSize; i += 2)
+  double x1, y1, x2, y2;
+  for (uint i = 0; i < MAP.lineSize (); i++)
     {
-      SDL_RenderDrawLine (ren,
-                          MAP.scale * (singletonMapPoint[i].x + MAP.x_offset),
-                          MAP.scale * (singletonMapPoint[i].y + MAP.y_offset),
-                          MAP.scale * (singletonMapPoint[i + 1].x + MAP.x_offset),
-                          MAP.scale * (singletonMapPoint[i + 1].y + MAP.y_offset));
+      x1 = MAP.getX1 (i);
+      y1 = MAP.getY1 (i);
+      x2 = MAP.getX2 (i);
+      y2 = MAP.getY2 (i);
+      SDL_RenderDrawLine (ren, x1, y1, x2, y2);
     }
-
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);
 }
 
