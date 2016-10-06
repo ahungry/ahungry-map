@@ -84,12 +84,6 @@ void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y)
   SDL_RenderDrawLine (ren, 0, 0, 50, 50);
 }
 
-/** @var Store a singleton instance of the map points array */
-SDL_Point* singletonMapPoint = nullptr;
-
-/** @var Store the size of the singleton instance of the map points array */
-uint singletonMapPointSize = 0;
-
 /**
  * Read the current map file, and load up the points
  *
@@ -97,10 +91,6 @@ uint singletonMapPointSize = 0;
  */
 void setMapSingletons ()
 {
-  // Points
-  std::vector<SDL_Point> mapPoints;
-  SDL_Point p;
-
   // Read file, loop over lines and draw each
   // @todo Error handle if map file does not exist
   const std::string mapFile = getResourcePath ("maps") + "map.txt";
@@ -127,14 +117,6 @@ void setMapSingletons ()
       x2.erase (x2.find_last_not_of(" ,") + 1);
       y2.erase (y2.find_last_not_of(" ,") + 1);
 
-      p.x = atof(x1.c_str ());
-      p.y = atof(y1.c_str ());
-      mapPoints.push_back (p);
-
-      p.x = atof(x2.c_str ());
-      p.y = atof(y2.c_str ());
-      mapPoints.push_back (p);
-
       // Load up a new MapLine instance after converting all the line values
       // Barf, need a way to dynamically apply same function set to all values (missing lisp!)
       MapLine *mapLine = new MapLine (
@@ -150,17 +132,6 @@ void setMapSingletons ()
                                       atoi(b.c_str ()));
       MAP.addLine (mapLine);
     }
-
-  SDL_Point *points = new SDL_Point[mapPoints.size () + 1];
-  uint i;
-
-  for (i = 0; i <= mapPoints.size (); i++)
-    {
-      points[i] = mapPoints[i];
-    }
-
-  singletonMapPoint = points;
-  singletonMapPointSize = i;
 }
 
 /**
@@ -183,10 +154,14 @@ void renderMapPoints (SDL_Renderer *ren)
   double x1, y1, x2, y2;
   for (uint i = 0; i < MAP.lineSize (); i++)
     {
-      x1 = MAP.getX1 (i);
-      y1 = MAP.getY1 (i);
-      x2 = MAP.getX2 (i);
-      y2 = MAP.getY2 (i);
+      MapLine ml = MAP.getLine (i);
+      // Dynamically set color per line via the map's request
+      SDL_SetRenderDrawColor (ren, ml.r, ml.g, ml.b, 0xFF);
+
+      x1 = MAP.getX (ml.point1.x);
+      y1 = MAP.getY (ml.point1.y);
+      x2 = MAP.getX (ml.point2.x);
+      y2 = MAP.getY (ml.point2.y);
       SDL_RenderDrawLine (ren, x1, y1, x2, y2);
     }
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);

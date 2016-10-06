@@ -24,10 +24,9 @@ public:
   void addLine (MapLine *mapLine);
   uint lineSize ();
   bool isLoaded ();
-  double getX1 (int n);
-  double getY1 (int n);
-  double getX2 (int n);
-  double getY2 (int n);
+  double getX (int n);
+  double getY (int n);
+  MapLine getLine (int n);
 };
 
 Map::Map()
@@ -46,29 +45,24 @@ uint Map::lineSize ()
   return map_lines.size ();
 }
 
+MapLine Map::getLine (int n)
+{
+  return *map_lines[n];
+}
+
 bool Map::isLoaded ()
 {
   return has_loaded_lines;
 }
 
-double Map::getX1 (int n)
+double Map::getX (int n)
 {
-  return scale * (map_lines[n]->point1.x + x_offset);
+  return scale * (n + x_offset);
 }
 
-double Map::getY1 (int n)
+double Map::getY (int n)
 {
-  return scale * (map_lines[n]->point1.y + y_offset);
-}
-
-double Map::getX2 (int n)
-{
-  return scale * (map_lines[n]->point2.x + x_offset);
-}
-
-double Map::getY2 (int n)
-{
-  return scale * (map_lines[n]->point2.y + y_offset);
+  return scale * (n + y_offset);
 }
 
 #endif
