@@ -1,22 +1,18 @@
-// Lots of useful SDL help and some code samples taken from:
-// http://www.willusher.io/pages/sdl2/
 #include <iostream>
 #include <string>
-#include <SDL2/SDL.h>
-#include "res_path.h"
-#include "cleanup.h"
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <SDL2/SDL.h>
+
+#include "res_path.h"
+#include "cleanup.h"
+#include "Map.hpp"
 #include "MapLine.hpp"
 
 const int SCREEN_WIDTH  = 640;
 const int SCREEN_HEIGHT = 640;
-double MAP_SCALE = .3;
-int X_OFFSET = 0;
-int Y_OFFSET = 0;
-int X_OFFSET_INCREMENT = 50;
-int Y_OFFSET_INCREMENT = 50;
+Map MAP;// = new Map();
 
 /**
  * Log an SDL error with some error message to the output stream of our choie
@@ -103,7 +99,6 @@ void setMapSingletons ()
 {
   // Points
   std::vector<SDL_Point> mapPoints;
-  std::vector<MapLine*> mapLines;
   SDL_Point p;
 
   // Read file, loop over lines and draw each
@@ -152,7 +147,7 @@ void setMapSingletons ()
                                       atoi(r.c_str ()),
                                       atoi(g.c_str ()),
                                       atoi(b.c_str ()));
-      mapLines.push_back (mapLine);
+      MAP.addLine (mapLine);
     }
 
   SDL_Point *points = new SDL_Point[mapPoints.size () + 1];
@@ -187,10 +182,10 @@ void renderMapPoints (SDL_Renderer *ren)
   for (uint i = 0; i < singletonMapPointSize; i += 2)
     {
       SDL_RenderDrawLine (ren,
-                          MAP_SCALE * (singletonMapPoint[i].x + X_OFFSET),
-                          MAP_SCALE * (singletonMapPoint[i].y + Y_OFFSET),
-                          MAP_SCALE * (singletonMapPoint[i + 1].x + X_OFFSET),
-                          MAP_SCALE * (singletonMapPoint[i + 1].y + Y_OFFSET));
+                          MAP.scale * (singletonMapPoint[i].x + MAP.x_offset),
+                          MAP.scale * (singletonMapPoint[i].y + MAP.y_offset),
+                          MAP.scale * (singletonMapPoint[i + 1].x + MAP.x_offset),
+                          MAP.scale * (singletonMapPoint[i + 1].y + MAP.y_offset));
     }
 
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);
@@ -289,27 +284,27 @@ int main (int, char**)
                   break;
 
                 case SDLK_LEFT:
-                  X_OFFSET += X_OFFSET_INCREMENT;
+                  MAP.x_offset += MAP.x_offset_increment;
                   break;
 
                 case SDLK_RIGHT:
-                  X_OFFSET -= X_OFFSET_INCREMENT;
+                  MAP.x_offset -= MAP.x_offset_increment;
                   break;
 
                 case SDLK_UP:
-                  Y_OFFSET += Y_OFFSET_INCREMENT;
+                  MAP.y_offset += MAP.y_offset_increment;
                   break;
 
                 case SDLK_DOWN:
-                  Y_OFFSET -= Y_OFFSET_INCREMENT;
+                  MAP.y_offset -= MAP.y_offset_increment;
                   break;
 
                 case SDLK_o:
-                  MAP_SCALE /= 2;
+                  MAP.scale /= 2;
                   break;
 
                 case SDLK_i:
-                  MAP_SCALE *= 2;
+                  MAP.scale *= 2;
                   break;
 
                 default:

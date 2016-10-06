@@ -1,3 +1,6 @@
+#ifndef MAP_LINE_H
+#define MAP_LINE_H
+
 #include <string>
 #include <SDL2/SDL.h>
 
@@ -56,3 +59,5 @@ MapLine::MapLine(
   this->g = g;
   this->b = b;
 }
+
+#endif
