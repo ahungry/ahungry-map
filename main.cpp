@@ -93,7 +93,7 @@ void setMapSingletons ()
 {
   // Read file, loop over lines and draw each
   // @todo Error handle if map file does not exist
-  const std::string mapFile = getResourcePath ("maps") + "map.txt";
+  const std::string mapFile = getResourcePath ("maps") + "tox.txt";
   std::cout << "Attempt to open: " << mapFile << std::endl;
   std::ifstream infile(mapFile);
   std::string line;
@@ -101,13 +101,19 @@ void setMapSingletons ()
   while (std::getline (infile, line))
     {
       std::istringstream iss (line);
-      std::string t, x1, x2, y1, y2, z1, z2, r, g, b;
+      std::string t, x1, x2, y1, y2, z1, z2, r, g, b, a, zone;
 
       // File format is as such:
       // L 1186.0742, -2175.0840, 3.1260,  1215.0065, -2174.9312, 3.1260,  150, 0, 200
       if (!(iss >> t >> x1 >> y1 >> z1 >> x2 >> y2 >> z2 >> r >> g >> b))
         {
-          break;
+          // Attempt to reparse line, accounting for P format
+          std::istringstream iss (line);
+
+          if (!(iss >> t >> x1 >> y1 >> z1 >> r >> g >> b >> a >> zone))
+            {
+              break;
+            }
         }
 
       // @todo Set these lines up as custom structs/classes so all values are easily parseable
@@ -129,7 +135,10 @@ void setMapSingletons ()
                                       atof(z2.c_str ()),
                                       atoi(r.c_str ()),
                                       atoi(g.c_str ()),
-                                      atoi(b.c_str ()));
+                                      atoi(b.c_str ()),
+                                      atoi(a.c_str ()),
+                                      zone
+                                      );
       MAP.addLine (mapLine);
     }
 }
@@ -155,6 +164,7 @@ void renderMapPoints (SDL_Renderer *ren)
   for (uint i = 0; i < MAP.lineSize (); i++)
     {
       MapLine ml = MAP.getLine (i);
+
       // Dynamically set color per line via the map's request
       SDL_SetRenderDrawColor (ren, ml.r, ml.g, ml.b, 0xFF);
 
@@ -162,7 +172,14 @@ void renderMapPoints (SDL_Renderer *ren)
       y1 = MAP.getY (ml.point1.y);
       x2 = MAP.getX (ml.point2.x);
       y2 = MAP.getY (ml.point2.y);
-      SDL_RenderDrawLine (ren, x1, y1, x2, y2);
+
+      if (ml.type == "L") {
+        SDL_RenderDrawLine (ren, x1, y1, x2, y2);
+      } else {
+        std::cout << "L TYPE: " << ml.type << std::endl;
+        SDL_Rect rect = { (int) x1, (int) y1, 10, 10 };
+        SDL_RenderFillRect (ren, &rect);
+      }
     }
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);
 }

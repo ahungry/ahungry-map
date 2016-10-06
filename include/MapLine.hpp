@@ -13,11 +13,11 @@
 class MapLine
 {
 public:
-  std::string type;
+  std::string type, zone;
   SDL_Point point1;
   SDL_Point point2;
   double z1, z2;
-  int r, g, b;
+  int r, g, b, a;
   /**
    * Load in a line of values, parse and store as necessary
    */
@@ -31,7 +31,9 @@ public:
           double z3,
           int r,
           int g,
-          int b
+          int b,
+          int a,
+          std::string zone
           );
 };
 
@@ -45,7 +47,9 @@ MapLine::MapLine(
           double z2,
           int r,
           int g,
-          int b
+          int b,
+          int a,
+          std::string zone
                  )
 {
   point1.x = x1;
@@ -58,6 +62,8 @@ MapLine::MapLine(
   this->r = r;
   this->g = g;
   this->b = b;
+  this->a = a;
+  this->zone = zone;
 }
 
 #endif
