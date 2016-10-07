@@ -62,24 +62,77 @@ SDL_Texture* loadTexture (const std::string &file, SDL_Renderer *ren)
 }
 
 /**
+ * Render the message we want to display to a texture for drawing
+ * @param message The message we want to display
+ * @param fontFile The font we want to use to render the text
+ * @param color The color we want the text to be
+ * @param fontSize The size we want the font to be
+ * @param renderer The renderer to load the texture in
+ * @return An SDL_Texture containing the rendered message, or nullptr if something went wrong
+ */
+SDL_Texture* renderText (const std::string &message, const std::string &fontFile,
+                         SDL_Color color, int fontSize, SDL_Renderer *renderer)
+{
+  //Open the font
+  TTF_Font *font = TTF_OpenFont (fontFile.c_str (), fontSize);
+
+  if (font == nullptr)
+    {
+      logSDLError (std::cout, "TTF_OpenFont");
+      return nullptr;
+    }
+
+  //We need to first render to a surface as that's what TTF_RenderText
+  //returns, then load that surface into a texture
+  SDL_Surface *surf = TTF_RenderText_Blended (font, message.c_str (), color);
+
+  if (surf == nullptr)
+    {
+      TTF_CloseFont (font);
+      logSDLError (std::cout, "TTF_RenderText");
+      return nullptr;
+    }
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface (renderer, surf);
+
+  if (texture == nullptr)
+    {
+      logSDLError (std::cout, "CreateTexture");
+    }
+
+  //Clean up the surface and font
+  SDL_FreeSurface (surf);
+  TTF_CloseFont (font);
+
+  return texture;
+}
+
+/**
  * Draw an SDL_Texture to an SDL_Renderer at position x,y, preserving the width/height
  *
  * @param tex The source texture we want to draw
  * @param ren The renderer we want to draw to
  * @param x The x coordinate to draw to
  * @param y The y coordinate to draw to
+ * @param w The width
+ * @param h The height
  */
-void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y)
+void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y, int w, int h)
 {
   // Setup the destination rectangle to be at the position we want
   SDL_Rect dst;
   dst.x = x;
   dst.y = y;
-  dst.w = SCREEN_WIDTH;
-  dst.h = SCREEN_HEIGHT;
+  dst.w = w;
+  dst.h = h;
 
-  // Query the texture to get its width and height to use
-  //SDL_QueryTexture (tex, NULL, NULL, &dst.w, &dst.h);
+  // If width or height is negative, render as same size of the image
+  if (w < 0 || h < 0)
+    {
+      // Query the texture to get its width and height to use
+      SDL_QueryTexture (tex, NULL, NULL, &dst.w, &dst.h);
+    }
+
   SDL_RenderCopy (ren, tex, NULL, &dst);
 }
 
@@ -227,8 +280,8 @@ int main (int, char**)
     }
 
   // @todo Uncomment the texture loading below, when ready to load images
-  const std::string resPath = getResourcePath ("img");
-  SDL_Texture *background = loadTexture (resPath + "grass.bmp", ren);
+  const std::string resPath = getResourcePath ();
+  SDL_Texture *background = loadTexture (resPath + "img/grass.bmp", ren);
   //SDL_Texture *image = loadTexture (resPath + "image.bmp", ren);
 
   if (background == nullptr)// || image == nullptr)
@@ -258,6 +311,26 @@ int main (int, char**)
   //int y = SCREEN_HEIGHT / 2 - iH / 2;
   //renderTexture (image, ren, x, y);
 
+  //We'll render the string "TTF fonts are cool!" in white
+  //Color is in RGBA format
+  SDL_Color color = { 255, 255, 255, 255 };
+  SDL_Texture *image = renderText ("TTF fonts are cool!", resPath + "fonts/kenpixel.ttf",
+                                   color, 12, ren);
+
+  if (image == nullptr)
+    {
+      cleanup (ren, win);
+      TTF_Quit ();
+      SDL_Quit ();
+      return 1;
+    }
+
+  //Get the texture w/h so we can center it in the screen
+  int iW, iH;
+  SDL_QueryTexture (image, NULL, NULL, &iW, &iH);
+  int fx = SCREEN_WIDTH / 2 - iW / 2;
+  int fy = SCREEN_HEIGHT / 2 - iH / 2;
+
   SDL_Event e;
   bool quit = false;
 
@@ -281,18 +354,22 @@ int main (int, char**)
                   quit = true;
                   break;
 
+                case SDLK_h:
                 case SDLK_LEFT:
                   MAP.x_offset += MAP.x_offset_increment;
                   break;
 
+                case SDLK_l:
                 case SDLK_RIGHT:
                   MAP.x_offset -= MAP.x_offset_increment;
                   break;
 
+                case SDLK_k:
                 case SDLK_UP:
                   MAP.y_offset += MAP.y_offset_increment;
                   break;
 
+                case SDLK_j:
                 case SDLK_DOWN:
                   MAP.y_offset -= MAP.y_offset_increment;
                   break;
@@ -320,8 +397,9 @@ int main (int, char**)
 
       // Present our render as output
       SDL_RenderClear (ren);
-      renderTexture (background, ren, 0, 0);
+      renderTexture (background, ren, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       renderMapPoints (ren);
+      renderTexture (image, ren, fx, fy, -1, -1);
       SDL_RenderPresent (ren);
       //SDL_Delay (300);
     }
