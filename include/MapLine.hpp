@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <SDL2/SDL.h>
+#include "SdlUtil.hpp"
 
 /**
  * Class for handling parsed map strings in an EQ file format such as:
@@ -19,6 +20,8 @@ public:
   SDL_Point point2;
   double z1, z2;
   int r, g, b, a;
+  SDL_Texture* labelImage;
+
   /**
    * Load in a line of values, parse and store as necessary
    */
@@ -39,18 +42,18 @@ public:
 };
 
 MapLine::MapLine(
-          std::string type,
-          double x1,
-          double y1,
-          double z1,
-          double x2,
-          double y2,
-          double z2,
-          int r,
-          int g,
-          int b,
-          int a,
-          std::string label
+                 std::string type,
+                 double x1,
+                 double y1,
+                 double z1,
+                 double x2,
+                 double y2,
+                 double z2,
+                 int r,
+                 int g,
+                 int b,
+                 int a,
+                 std::string label
                  )
 {
   point1.x = x1;
@@ -65,12 +68,6 @@ MapLine::MapLine(
   this->b = b;
   this->a = a;
   this->label = label;
-
-  if (label.length () > 0)
-    {
-      // Find a label, load it as a font image
-      std::cout << "Found a label: " << label << std::endl;
-    }
 }
 
 #endif

@@ -16,13 +16,14 @@ const int SCREEN_WIDTH  = 640;
 const int SCREEN_HEIGHT = 640;
 Map MAP;// = new Map();
 SdlUtil SDL_UTIL;
+const std::string resPath = getResourcePath ();
 
 /**
  * Read the current map file, and load up the points
  *
  * @return The generated map points
  */
-void setMapSingletons ()
+void setMapSingletons (SDL_Renderer *ren)
 {
   // Read file, loop over lines and draw each
   // @todo Error handle if map file does not exist
@@ -72,6 +73,23 @@ void setMapSingletons ()
                                       atoi(a.c_str ()),
                                       label
                                       );
+
+      // If we have a label, make it a font texture/image
+      if (label.length () > 0)
+        {
+          std::cout << "Found a label: " << label << std::endl;
+
+          // Load up the font file
+          SDL_Color color = { 255, 255, 255, 255 };
+          SDL_Texture *image = SDL_UTIL.renderText (label, resPath + "fonts/kenpixel.ttf",
+                                                    color, 32, ren);
+          mapLine->labelImage = image;
+        }
+      else
+        {
+          mapLine->labelImage = nullptr;
+        }
+
       MAP.addLine (mapLine);
     }
 }
@@ -83,7 +101,7 @@ void renderMapPoints (SDL_Renderer *ren)
 {
   if (! MAP.isLoaded ())
     {
-      setMapSingletons ();
+      setMapSingletons (ren);
     }
 
   // Paint background
@@ -102,16 +120,32 @@ void renderMapPoints (SDL_Renderer *ren)
       // Dynamically set color per line via the map's request
       SDL_SetRenderDrawColor (ren, ~ml.r, ~ml.g, ~ml.b, 0xFF);
 
-      x1 = MAP.getX (ml.point1.x);
-      y1 = MAP.getY (ml.point1.y);
-      x2 = MAP.getX (ml.point2.x);
-      y2 = MAP.getY (ml.point2.y);
+      x1 = (int) MAP.getX (ml.point1.x);
+      y1 = (int) MAP.getY (ml.point1.y);
+      x2 = (int) MAP.getX (ml.point2.x);
+      y2 = (int) MAP.getY (ml.point2.y);
 
       if (ml.type == "L") {
         SDL_RenderDrawLine (ren, x1, y1, x2, y2);
       } else {
         SDL_Rect rect = { (int) x1, (int) y1, (int) MAP.scale * 10, (int) MAP.scale * 10 };
         SDL_RenderFillRect (ren, &rect);
+
+        // @todo draw the font
+        if (ml.labelImage != nullptr)
+          {
+            //std::cout << "Drawing the font? " << ml.label << std::endl;
+
+            int iW, iH;
+            SDL_QueryTexture (ml.labelImage, NULL, NULL, &iW, &iH);
+            SDL_UTIL.renderTexture (ml.labelImage, ren, x1, y1,
+                                    .6 * MAP.scale * iW,
+                                    .6 * MAP.scale * iH);
+          }
+        else
+          {
+            SDL_UTIL.logSDLError (std::cout, "LabelImage failure...");
+          }
       }
     }
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);
@@ -135,7 +169,7 @@ int main (int, char**)
       return 1;
     }
 
-  SDL_Window *win = SDL_CreateWindow ("Lesson 2", 100, 100,
+  SDL_Window *win = SDL_CreateWindow ("Ahungry Map", 100, 100,
                                       SCREEN_WIDTH,
                                       SCREEN_HEIGHT,
                                       SDL_WINDOW_SHOWN);
@@ -161,7 +195,12 @@ int main (int, char**)
     }
 
   // @todo Uncomment the texture loading below, when ready to load images
-  const std::string resPath = getResourcePath ();
+
+  // Store these in our SDL_UTIL to avoid having to pass in params all over
+  // As we are only working with one renderer/window per instance of SDL_UTIL
+  SDL_UTIL.ren = ren;
+  SDL_UTIL.win = win;
+
   SDL_Texture *background = SDL_UTIL.loadTexture (resPath + "img/grass.bmp", ren);
   //SDL_Texture *image = loadTexture (resPath + "image.bmp", ren);
 
@@ -195,7 +234,7 @@ int main (int, char**)
   //We'll render the string "TTF fonts are cool!" in white
   //Color is in RGBA format
   SDL_Color color = { 255, 255, 255, 255 };
-  SDL_Texture *image = SDL_UTIL.renderText ("TTF fonts are cool!", resPath + "fonts/kenpixel.ttf",
+  SDL_Texture *image = SDL_UTIL.renderText ("Ahungry Map", resPath + "fonts/kenpixel.ttf",
                                    color, 12, ren);
 
   if (image == nullptr)
@@ -237,22 +276,22 @@ int main (int, char**)
 
                 case SDLK_h:
                 case SDLK_LEFT:
-                  MAP.x_offset += MAP.x_offset_increment;
+                  MAP.xOffset += MAP.xOffsetIncrement;
                   break;
 
                 case SDLK_l:
                 case SDLK_RIGHT:
-                  MAP.x_offset -= MAP.x_offset_increment;
+                  MAP.xOffset -= MAP.xOffsetIncrement;
                   break;
 
                 case SDLK_k:
                 case SDLK_UP:
-                  MAP.y_offset += MAP.y_offset_increment;
+                  MAP.yOffset += MAP.yOffsetIncrement;
                   break;
 
                 case SDLK_j:
                 case SDLK_DOWN:
-                  MAP.y_offset -= MAP.y_offset_increment;
+                  MAP.yOffset -= MAP.yOffsetIncrement;
                   break;
 
                 case SDLK_o:
@@ -280,7 +319,7 @@ int main (int, char**)
       SDL_RenderClear (ren);
       SDL_UTIL.renderTexture (background, ren, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       renderMapPoints (ren);
-      SDL_UTIL.renderTexture (image, ren, fx, fy, -1, -1);
+      SDL_UTIL.renderTexture (image, ren, 0, SCREEN_HEIGHT - 50, -1, -1);
       SDL_RenderPresent (ren);
       //SDL_Delay (300);
     }

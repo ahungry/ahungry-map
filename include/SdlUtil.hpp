@@ -25,6 +25,9 @@
 class SdlUtil
 {
 public:
+  SDL_Renderer* ren;
+  SDL_Window* win;
+
   SdlUtil ();
   void logSDLError (std::ostream &os, const std::string &msg);
   void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y, int w, int h);
