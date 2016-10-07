@@ -15,12 +15,12 @@ class Map
   bool has_loaded_lines = false;
   std::vector<MapLine*> map_lines;
 public:
-  double scale = .3;
+  double scale = 0.15;
   int xOffset = 0;
   int yOffset = 0;
   int xOffsetIncrement = 300;
   int yOffsetIncrement = 300;
-  Map ();
+  Map (double scale, int xOffset, int yOffset);
   void addLine (MapLine *mapLine);
   uint lineSize ();
   bool isLoaded ();
@@ -29,8 +29,11 @@ public:
   MapLine getLine (int n);
 };
 
-Map::Map()
+Map::Map (double scale, int xOffset, int yOffset)
 {
+  this->scale = scale;
+  this->xOffset = xOffset;
+  this->yOffset = yOffset;
   std::cout << " map init " << std::endl;
 }
 

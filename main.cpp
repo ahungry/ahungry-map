@@ -12,9 +12,9 @@
 #include "MapLine.hpp"
 #include "SdlUtil.hpp"
 
-const int SCREEN_WIDTH  = 640;
-const int SCREEN_HEIGHT = 640;
-Map MAP;// = new Map();
+const int SCREEN_WIDTH  = 800;
+const int SCREEN_HEIGHT = 500;
+Map MAP { 0.15, 2400, 3000 };// = new Map();
 SdlUtil SDL_UTIL;
 const std::string resPath = getResourcePath ();
 
@@ -139,8 +139,8 @@ void renderMapPoints (SDL_Renderer *ren)
             int iW, iH;
             SDL_QueryTexture (ml.labelImage, NULL, NULL, &iW, &iH);
             SDL_UTIL.renderTexture (ml.labelImage, ren, x1, y1,
-                                    .6 * MAP.scale * iW,
-                                    .6 * MAP.scale * iH);
+                                    2 * MAP.scale * iW,
+                                    2 * MAP.scale * iH);
           }
         else
           {
@@ -277,29 +277,35 @@ int main (int, char**)
                 case SDLK_h:
                 case SDLK_LEFT:
                   MAP.xOffset += MAP.xOffsetIncrement;
+                  std::cout << "xOff: " << MAP.xOffset << std::endl;
                   break;
 
                 case SDLK_l:
                 case SDLK_RIGHT:
                   MAP.xOffset -= MAP.xOffsetIncrement;
+                  std::cout << "xOff: " << MAP.xOffset << std::endl;
                   break;
 
                 case SDLK_k:
                 case SDLK_UP:
                   MAP.yOffset += MAP.yOffsetIncrement;
+                  std::cout << "yOff: " << MAP.yOffset << std::endl;
                   break;
 
                 case SDLK_j:
                 case SDLK_DOWN:
                   MAP.yOffset -= MAP.yOffsetIncrement;
+                  std::cout << "yOff: " << MAP.yOffset << std::endl;
                   break;
 
                 case SDLK_o:
                   MAP.scale /= 2;
+                  std::cout << "Scale: " << MAP.scale << std::endl;
                   break;
 
                 case SDLK_i:
                   MAP.scale *= 2;
+                  std::cout << "Scale: " << MAP.scale << std::endl;
                   break;
 
                 default:
