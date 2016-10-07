@@ -34,7 +34,7 @@ void setMapSingletons ()
   while (std::getline (infile, line))
     {
       std::istringstream iss (line);
-      std::string t, x1, x2, y1, y2, z1, z2, r, g, b, a, zone;
+      std::string t, x1, x2, y1, y2, z1, z2, r, g, b, a, label;
 
       // File format is as such:
       // L 1186.0742, -2175.0840, 3.1260,  1215.0065, -2174.9312, 3.1260,  150, 0, 200
@@ -43,7 +43,7 @@ void setMapSingletons ()
           // Attempt to reparse line, accounting for P format
           std::istringstream iss (line);
 
-          if (!(iss >> t >> x1 >> y1 >> z1 >> r >> g >> b >> a >> zone))
+          if (!(iss >> t >> x1 >> y1 >> z1 >> r >> g >> b >> a >> label))
             {
               break;
             }
@@ -70,7 +70,7 @@ void setMapSingletons ()
                                       atoi(g.c_str ()),
                                       atoi(b.c_str ()),
                                       atoi(a.c_str ()),
-                                      zone
+                                      label
                                       );
       MAP.addLine (mapLine);
     }
@@ -118,7 +118,7 @@ void renderMapPoints (SDL_Renderer *ren)
 }
 
 /*
- * Lesson 1: Hello world
+ * Handle drawing a map
  */
 int main (int, char**)
 {

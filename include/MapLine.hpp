@@ -1,6 +1,7 @@
 #ifndef MAP_LINE_H
 #define MAP_LINE_H
 
+#include <iostream>
 #include <string>
 #include <SDL2/SDL.h>
 
@@ -13,7 +14,7 @@
 class MapLine
 {
 public:
-  std::string type, zone;
+  std::string type, label;
   SDL_Point point1;
   SDL_Point point2;
   double z1, z2;
@@ -33,7 +34,7 @@ public:
           int g,
           int b,
           int a,
-          std::string zone
+          std::string label
           );
 };
 
@@ -49,7 +50,7 @@ MapLine::MapLine(
           int g,
           int b,
           int a,
-          std::string zone
+          std::string label
                  )
 {
   point1.x = x1;
@@ -63,7 +64,13 @@ MapLine::MapLine(
   this->g = g;
   this->b = b;
   this->a = a;
-  this->zone = zone;
+  this->label = label;
+
+  if (label.length () > 0)
+    {
+      // Find a label, load it as a font image
+      std::cout << "Found a label: " << label << std::endl;
+    }
 }
 
 #endif

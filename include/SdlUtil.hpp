@@ -25,8 +25,6 @@
 class SdlUtil
 {
 public:
-  double scale = 1;
-
   SdlUtil ();
   void logSDLError (std::ostream &os, const std::string &msg);
   void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y, int w, int h);
