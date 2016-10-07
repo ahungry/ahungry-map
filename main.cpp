@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "res_path.h"
 #include "cleanup.h"
@@ -74,14 +75,12 @@ void renderTexture (SDL_Texture *tex, SDL_Renderer *ren, int x, int y)
   SDL_Rect dst;
   dst.x = x;
   dst.y = y;
+  dst.w = SCREEN_WIDTH;
+  dst.h = SCREEN_HEIGHT;
 
   // Query the texture to get its width and height to use
-  SDL_QueryTexture (tex, NULL, NULL, &dst.w, &dst.h);
+  //SDL_QueryTexture (tex, NULL, NULL, &dst.w, &dst.h);
   SDL_RenderCopy (ren, tex, NULL, &dst);
-
-  // Draw some lines on it
-  SDL_SetRenderDrawColor (ren, 0xFF, 0xFF, 0xFF, 0xFF);
-  SDL_RenderDrawLine (ren, 0, 0, 50, 50);
 }
 
 /**
@@ -154,7 +153,8 @@ void renderMapPoints (SDL_Renderer *ren)
     }
 
   // Paint background
-  SDL_SetRenderDrawColor (ren, 0x00, 0x00, 0x00, 0x00);
+  SDL_SetRenderDrawBlendMode (ren, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawColor (ren, 0x00, 0x00, 0x00, 0xAA);
   SDL_Rect rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
   SDL_RenderFillRect (ren, &rect);
 
@@ -166,7 +166,7 @@ void renderMapPoints (SDL_Renderer *ren)
       MapLine ml = MAP.getLine (i);
 
       // Dynamically set color per line via the map's request
-      SDL_SetRenderDrawColor (ren, ml.r, ml.g, ml.b, 0xFF);
+      SDL_SetRenderDrawColor (ren, ~ml.r, ~ml.g, ~ml.b, 0xFF);
 
       x1 = MAP.getX (ml.point1.x);
       y1 = MAP.getY (ml.point1.y);
@@ -176,8 +176,7 @@ void renderMapPoints (SDL_Renderer *ren)
       if (ml.type == "L") {
         SDL_RenderDrawLine (ren, x1, y1, x2, y2);
       } else {
-        std::cout << "L TYPE: " << ml.type << std::endl;
-        SDL_Rect rect = { (int) x1, (int) y1, 10, 10 };
+        SDL_Rect rect = { (int) x1, (int) y1, (int) MAP.scale * 10, (int) MAP.scale * 10 };
         SDL_RenderFillRect (ren, &rect);
       }
     }
@@ -192,6 +191,13 @@ int main (int, char**)
   if (SDL_Init (SDL_INIT_EVERYTHING) != 0)
     {
       logSDLError (std::cout, "SDL_Init");
+      return 1;
+    }
+
+  if (TTF_Init () != 0)
+    {
+      logSDLError (std::cout, "TTF_Init");
+      SDL_Quit ();
       return 1;
     }
 
@@ -221,18 +227,17 @@ int main (int, char**)
     }
 
   // @todo Uncomment the texture loading below, when ready to load images
-  //const std::string resPath = getResourcePath ("img");
-  //SDL_Texture *background = loadTexture (resPath + "background.bmp", ren);
+  const std::string resPath = getResourcePath ("img");
+  SDL_Texture *background = loadTexture (resPath + "grass.bmp", ren);
   //SDL_Texture *image = loadTexture (resPath + "image.bmp", ren);
 
-  // if (background == nullptr || image == nullptr)
-  //   {
-  //     cleanup (background, image, ren, win);
-  //     SDL_Quit ();
-  //     return 1;
-  //   }
-
-  // SDL_RenderClear (ren);
+  if (background == nullptr)// || image == nullptr)
+    {
+      //cleanup (background, image, ren, win);
+      cleanup (background, ren, win);
+      SDL_Quit ();
+      return 1;
+    }
 
   // int bW, bH;
   // SDL_QueryTexture (background, NULL, NULL, &bW, &bH);
@@ -315,6 +320,7 @@ int main (int, char**)
 
       // Present our render as output
       SDL_RenderClear (ren);
+      renderTexture (background, ren, 0, 0);
       renderMapPoints (ren);
       SDL_RenderPresent (ren);
       //SDL_Delay (300);
