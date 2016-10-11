@@ -15,6 +15,7 @@
 
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
+int AUTO_FOLLOW = -1;
 Map MAP { 0.15, 2400, 3000 };// = new Map();
 Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
@@ -172,7 +173,7 @@ void renderPlayer (SDL_Renderer *ren)
   // do not paint background or anything, as we need to preserve map line draw
   SDL_SetRenderDrawColor (ren, 0xFF, 0x00, 0x00, 0xAA);
   //SDL_Rect rect = { PLAYER.x, PLAYER.y, (int) (MAP.scale * 1000), (int) (MAP.scale * 1000) };
-  SDL_Rect rect = { x1, y1, (int) (MAP.scale * 10), (int) (MAP.scale * 10) };
+  SDL_Rect rect = { x1, y1, (int) (MAP.scale * 50), (int) (MAP.scale * 50) };
 
   if (0 != SDL_RenderFillRect (ren, &rect))
     {
@@ -191,6 +192,18 @@ void renderPlayer (SDL_Renderer *ren)
     {
       //SDL_UTIL.logSDLError (std::cout, "LabelImage failure...");
     }
+}
+
+/**
+ * Recenter the map on the player location
+ */
+void recenterOnPlayer ()
+{
+  // center on X
+  MAP.xOffset = PLAYER.x * MAP.scale + SCREEN_WIDTH / MAP.scale / 2 - (50 / 2 * MAP.scale);
+
+  // center on Y
+  MAP.yOffset = PLAYER.y * MAP.scale + SCREEN_HEIGHT / MAP.scale / 4 + (50 / 4 * MAP.scale);
 }
 
 /*
@@ -340,22 +353,31 @@ int main (int, char**)
 
                 case SDLK_o:
                   MAP.scale /= 2;
+                  if (AUTO_FOLLOW)
+                    {
+                      recenterOnPlayer ();
+                    }
                   std::cout << "Scale: " << MAP.scale << std::endl;
                   break;
 
                 case SDLK_i:
                   MAP.scale *= 2;
+                  if (AUTO_FOLLOW)
+                    {
+                      recenterOnPlayer ();
+                    }
+
                   std::cout << "Scale: " << MAP.scale << std::endl;
                   break;
 
                 case SDLK_r:
-                  // center on X
-                  MAP.xOffset = PLAYER.x * MAP.scale + SCREEN_WIDTH / MAP.scale / 2;
-
-                  // center on Y
-                  MAP.yOffset = PLAYER.y * MAP.scale;// + SCREEN_HEIGHT / 2;
-
+                  recenterOnPlayer ();
                   std::cout << "Centering..." << std::endl;
+                  break;
+
+                case SDLK_a:
+                  AUTO_FOLLOW = ~AUTO_FOLLOW;
+                  std::cout << "Toggling auto follow..." << std::endl;
                   break;
 
                 default:
