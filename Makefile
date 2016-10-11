@@ -6,8 +6,9 @@ SDL_INCLUDE = -I/usr/local/include
 CXXFLAGS = -Wall -c -std=c++11 $(SDL_INCLUDE) -Iinclude
 LDFLAGS = $(SDL_LIB)
 EXE = bin/ahungry-map
+LOGEXE = bin/log-read
 
-all: $(EXE)
+all: $(EXE) $(LOGEXE)
 
 $(EXE): main.o
 	$(CXX) $< $(LDFLAGS) -o $@
@@ -15,5 +16,11 @@ $(EXE): main.o
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@
 
+$(LOGEXE): logRead.o
+	$(CXX) $< $(LDFLAGS) -o $@
+
+logRead.o: logRead.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
+
 clean:
-	rm *.o && rm $(EXE)
+	rm *.o && rm $(EXE) && rm $(LOGEXE)

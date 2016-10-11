@@ -15,22 +15,22 @@
 
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
+const std::string resPath = getResourcePath ();
 int AUTO_FOLLOW = -1;
 Map MAP { 0.15, 2400, 3000 };// = new Map();
 Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
-const std::string resPath = getResourcePath ();
 
 /**
  * Read the current map file, and load up the points
  *
  * @return The generated map points
  */
-void setMapSingletons (SDL_Renderer *ren)
+void setMapSingletons (SDL_Renderer *ren, std::string zoneName)
 {
   // Read file, loop over lines and draw each
   // @todo Error handle if map file does not exist
-  const std::string mapFile = getResourcePath ("maps") + "tox.txt";
+  const std::string mapFile = getResourcePath ("maps") + zoneName.c_str ();
   std::cout << "Attempt to open: " << mapFile << std::endl;
   std::ifstream infile(mapFile);
   std::string line;
@@ -104,7 +104,7 @@ void renderMapPoints (SDL_Renderer *ren)
 {
   if (! MAP.isLoaded ())
     {
-      setMapSingletons (ren);
+      setMapSingletons (ren, "tox.txt");
     }
 
   // Paint background
@@ -306,6 +306,8 @@ int main (int, char**)
 
   SDL_Event e;
   bool quit = false;
+
+  recenterOnPlayer ();
 
   while (!quit)
     {
