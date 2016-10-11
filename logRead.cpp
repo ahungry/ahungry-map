@@ -19,6 +19,7 @@ int main (int, char**)
   cout << "Read the log" << endl;
 
   LOG_PARSER.parse ();
+  cout << "After parsing: " << LOG_PARSER.x << "and " << LOG_PARSER.y << endl;
 
   return 0;
 }

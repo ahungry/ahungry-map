@@ -12,6 +12,7 @@
 #include "Map.hpp"
 #include "MapLine.hpp"
 #include "SdlUtil.hpp"
+#include "LogParser.hpp"
 
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
@@ -20,6 +21,7 @@ int AUTO_FOLLOW = -1;
 Map MAP { 0.15, 2400, 3000 };// = new Map();
 Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
+LogParser LOG_PARSER = { resPath + "logs/active.log" };
 
 /**
  * Read the current map file, and load up the points
@@ -319,6 +321,11 @@ int main (int, char**)
               quit = true;
             }
 
+          if (AUTO_FOLLOW)
+            {
+              recenterOnPlayer ();
+            }
+
           // key press events
           // https://wiki.libsdl.org/SDL_Keycode
           if (e.type == SDL_KEYDOWN)
@@ -394,6 +401,12 @@ int main (int, char**)
               quit = true;
             }
         }
+
+      // Update the player x/y coords
+      // @todo Add this in a separate thread with a different timing interval
+      LOG_PARSER.parse ();
+      PLAYER.x = LOG_PARSER.x;
+      PLAYER.y = LOG_PARSER.y;
 
       // Present our render as output
       SDL_RenderClear (ren);

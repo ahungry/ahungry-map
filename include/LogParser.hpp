@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <regex.h>
 
 /**
  * Class for storing the logParser lines and handling scaling values for the logParser we render
@@ -19,11 +18,17 @@ class LogParser
   char line[255];
   char *c;
   std::string regex = "You have entered";
+  long fileSize;
 public:
   char *zone;
+  char *location;
+  double x, y;
+
   LogParser (std::string fn);
   ~LogParser ();
   void parse ();
+  void setXandY (char *location);
+  bool hasNewSize ();
 };
 
 LogParser::LogParser (std::string fn)
@@ -45,29 +50,113 @@ LogParser::~LogParser ()
   fclose (fp);
 }
 
+void LogParser::setXandY (char *location)
+{
+  // @todo This could probably be cleaned up, especially if using some C++ not just C
+  printf ("Working on parsing '%s'\n", location);
+  char x[10], y[10];
+  char c;
+  double dx, dy;
+  bool comma = false;
+  int xi = 0;
+  int yi = 0;
+
+  for (uint i = 0; i < strlen (location); i++)
+    {
+      c = location[i];
+
+      // Abort on second comma
+      if (c == ',' && comma)
+        {
+          y[yi] = '\0';
+          break;
+        }
+      else if (c == ',')
+        {
+          x[xi] = '\0';
+          comma = true;
+          continue;
+        }
+
+      // Otherwise, read into y
+      if (comma)
+        {
+          y[yi++] = location[i];
+        }
+      else
+        {
+          x[xi++] = location[i];
+        }
+    }
+
+  dx = atof (x);
+  dy = atof (y);
+  printf ("Found X: %f, and Y: %f\n", dx, dy);
+
+  this->x = dx;
+  this->y = dy;
+}
+
+/**
+ * Check if the file has a different line count or not
+ */
+bool LogParser::hasNewSize ()
+{
+  long size;
+  rewind (fp);
+  fseek (fp, 0, SEEK_END);
+  size = ftell (fp);
+  rewind (fp);
+
+  if (size == fileSize)
+    {
+      return false;
+    }
+  else
+    {
+      fileSize = size;
+      return true;
+    }
+}
+
 void LogParser::parse ()
 {
-  regex_t *preg = (regex_t*) calloc (1, sizeof (regex_t));
-  regcomp (preg, regex.c_str (), REG_EXTENDED | REG_NOSUB);
-  char found[255];
+  if (!hasNewSize ())
+    {
+      printf ("Skipping log parse, size hasn't changed...\n");
+    }
+
+  char *found;
+  char zone[50];
+  char location[100];
 
   do {
     c = fgets (line, 255, fp);
-    if (c != NULL && !regexec (preg, c, 0, 0, 0))
+
+    if (c != NULL)
       {
-        strcpy(found, c);
+        // If we hit this, we are changing zones on this line
+        if ((found = strstr(c, "You have entered ")) != NULL)//!regexec (preg, c, 0, 0, 0))
+          {
+            strcpy (zone, found + 17);
+            zone[strlen(zone) - 3] = '\0';
+          }
+
+        // If we hit this, we are finding coordinates
+        if ((found = strstr(c, "Your Location is ")) != NULL)
+          {
+            strcpy (location, found + 17);
+            location[strlen(location) - 2] = '\0';
+          }
       }
   } while (c != NULL);
 
-  regfree (preg);
-
-  // Just snag the zone name
-  char zone[40];
-  strcpy (zone, strstr(found, "You have entered ") + 17);
-  zone[strlen(zone) - 3] = '\0';
   this->zone = zone;
+  this->location = location;
+  setXandY (location);
 
-  printf ("Last found was '%s'\n", this->zone);
+  printf ("Zone was '%s'\n", this->zone);
+  printf ("Location was '%s'\n", this->location);
 }
 
 #endif
