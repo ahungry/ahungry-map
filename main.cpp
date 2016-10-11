@@ -8,6 +8,7 @@
 
 #include "res_path.h"
 #include "cleanup.h"
+#include "Player.hpp"
 #include "Map.hpp"
 #include "MapLine.hpp"
 #include "SdlUtil.hpp"
@@ -15,6 +16,7 @@
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
 Map MAP { 0.15, 2400, 3000 };// = new Map();
+Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
 const std::string resPath = getResourcePath ();
 
@@ -108,7 +110,10 @@ void renderMapPoints (SDL_Renderer *ren)
   SDL_SetRenderDrawBlendMode (ren, SDL_BLENDMODE_BLEND);
   SDL_SetRenderDrawColor (ren, 0x00, 0x00, 0x00, 0xAA);
   SDL_Rect rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-  SDL_RenderFillRect (ren, &rect);
+  if (0 != SDL_RenderFillRect (ren, &rect))
+    {
+      SDL_UTIL.logSDLError (std::cout, "SDL_RenderFillRect");
+    }
 
   SDL_SetRenderDrawColor (ren, 0xFF, 0xFF, 0xFF, 0xFF);
 
@@ -128,8 +133,13 @@ void renderMapPoints (SDL_Renderer *ren)
       if (ml.type == "L") {
         SDL_RenderDrawLine (ren, x1, y1, x2, y2);
       } else {
-        SDL_Rect rect = { (int) x1, (int) y1, (int) MAP.scale * 10, (int) MAP.scale * 10 };
-        SDL_RenderFillRect (ren, &rect);
+        SDL_SetRenderDrawColor (ren, 0x00, 0xFF, 0xFF, 0xFF);
+        SDL_Rect rect = { (int) x1, (int) y1, (int) (MAP.scale * 10), (int) (MAP.scale * 10) };
+
+        if (0 != SDL_RenderFillRect (ren, &rect))
+          {
+            SDL_UTIL.logSDLError (std::cout, "SDL_RenderFillRect");
+          }
 
         // @todo draw the font
         if (ml.labelImage != nullptr)
@@ -149,6 +159,38 @@ void renderMapPoints (SDL_Renderer *ren)
       }
     }
   //SDL_RenderDrawLines (ren, singletonMapPoint, singletonMapPointSize);
+}
+
+/**
+ * Hopefully this is being called after renderMapPoints
+ */
+void renderPlayer (SDL_Renderer *ren)
+{
+  int x1 = (int) MAP.getX (PLAYER.x);
+  int y1 = (int) MAP.getY (-1 * PLAYER.y); // Y is flipped in the EQ map
+
+  // do not paint background or anything, as we need to preserve map line draw
+  SDL_SetRenderDrawColor (ren, 0xFF, 0x00, 0x00, 0xAA);
+  //SDL_Rect rect = { PLAYER.x, PLAYER.y, (int) (MAP.scale * 1000), (int) (MAP.scale * 1000) };
+  SDL_Rect rect = { x1, y1, (int) (MAP.scale * 10), (int) (MAP.scale * 10) };
+
+  if (0 != SDL_RenderFillRect (ren, &rect))
+    {
+      SDL_UTIL.logSDLError (std::cout, "SDL_RenderFillRect");
+    }
+
+  if (PLAYER.labelImage != nullptr)
+    {
+      int iW, iH;
+      SDL_QueryTexture (PLAYER.labelImage, NULL, NULL, &iW, &iH);
+      SDL_UTIL.renderTexture (PLAYER.labelImage, ren, PLAYER.x, PLAYER.y,
+                              2 * MAP.scale * iW,
+                              2 * MAP.scale * iH);
+    }
+  else
+    {
+      //SDL_UTIL.logSDLError (std::cout, "LabelImage failure...");
+    }
 }
 
 /*
@@ -248,8 +290,6 @@ int main (int, char**)
   //Get the texture w/h so we can center it in the screen
   int iW, iH;
   SDL_QueryTexture (image, NULL, NULL, &iW, &iH);
-  int fx = SCREEN_WIDTH / 2 - iW / 2;
-  int fy = SCREEN_HEIGHT / 2 - iH / 2;
 
   SDL_Event e;
   bool quit = false;
@@ -308,6 +348,16 @@ int main (int, char**)
                   std::cout << "Scale: " << MAP.scale << std::endl;
                   break;
 
+                case SDLK_r:
+                  // center on X
+                  MAP.xOffset = PLAYER.x * MAP.scale + SCREEN_WIDTH / MAP.scale / 2;
+
+                  // center on Y
+                  MAP.yOffset = PLAYER.y * MAP.scale;// + SCREEN_HEIGHT / 2;
+
+                  std::cout << "Centering..." << std::endl;
+                  break;
+
                 default:
                   std::cout << " unmapped key " << e.key.keysym.sym << std::endl;
                   break;
@@ -325,6 +375,7 @@ int main (int, char**)
       SDL_RenderClear (ren);
       SDL_UTIL.renderTexture (background, ren, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       renderMapPoints (ren);
+      renderPlayer (ren);
       SDL_UTIL.renderTexture (image, ren, 0, SCREEN_HEIGHT - 50, -1, -1);
       SDL_RenderPresent (ren);
       //SDL_Delay (300);
