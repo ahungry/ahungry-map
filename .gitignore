@@ -1,5 +1,7 @@
-bin/*
-res/logs/*
+/bin/*
+/res/logs/*
+/res/maps
+/res/maps/
 *.o
 *.#*
 *#*#
