@@ -164,8 +164,8 @@ void renderMapPoints (SDL_Renderer *ren)
             int iW, iH;
             SDL_QueryTexture (ml.labelImage, NULL, NULL, &iW, &iH);
             SDL_UTIL.renderTexture (ml.labelImage, ren, x1, y1,
-                                    2 * MAP.scale * iW,
-                                    2 * MAP.scale * iH);
+                                    .3 * iW,
+                                    .3 * iH);
           }
         else
           {
@@ -213,11 +213,13 @@ void renderPlayer (SDL_Renderer *ren)
  */
 void recenterOnPlayer ()
 {
-  // center on X
-  MAP.xOffset = PLAYER.x * MAP.scale + SCREEN_WIDTH / MAP.scale / 2 - (50 / 2 * MAP.scale);
+  // This X/Y is properly fixed at the top left of the map
+  MAP.xOffset = PLAYER.x * -1;
+  MAP.yOffset = PLAYER.y;
 
-  // center on Y
-  MAP.yOffset = PLAYER.y * MAP.scale + SCREEN_HEIGHT / MAP.scale / 4 + (50 / 4 * MAP.scale);
+  // This X/Y is fixed in center of screen
+  MAP.xOffset = PLAYER.x * -1 + (SCREEN_WIDTH / 2 / MAP.scale);
+  MAP.yOffset = PLAYER.y + (SCREEN_HEIGHT / 2 / MAP.scale);
 }
 
 /*

@@ -96,8 +96,9 @@ void LogParser::setXandY (char *location)
   dy = atof (y);
   printf ("Found X: %f, and Y: %f\n", dx, dy);
 
-  this->x = dx;
-  this->y = dy;
+  // EQ log files map it in Y, X, Z order for some strange reason
+  this->x = dy;
+  this->y = dx;
 }
 
 /**
