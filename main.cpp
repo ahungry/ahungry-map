@@ -181,7 +181,7 @@ void renderMapPoints (SDL_Renderer *ren)
  */
 void renderPlayer (SDL_Renderer *ren)
 {
-  int x1 = (int) MAP.getX (PLAYER.x);
+  int x1 = (int) MAP.getX (-1 * PLAYER.x); // X is flipped in the EQ map
   int y1 = (int) MAP.getY (-1 * PLAYER.y); // Y is flipped in the EQ map
 
   // do not paint background or anything, as we need to preserve map line draw
@@ -214,12 +214,12 @@ void renderPlayer (SDL_Renderer *ren)
 void recenterOnPlayer ()
 {
   // This X/Y is properly fixed at the top left of the map
-  MAP.xOffset = PLAYER.x * -1;
+  MAP.xOffset = PLAYER.x;
   MAP.yOffset = PLAYER.y;
 
   // This X/Y is fixed in center of screen
-  MAP.xOffset = PLAYER.x * -1 + (SCREEN_WIDTH / 2 / MAP.scale);
-  MAP.yOffset = PLAYER.y + (SCREEN_HEIGHT / 2 / MAP.scale);
+  MAP.xOffset = PLAYER.x + (SCREEN_WIDTH / 2 / MAP.scale) - 50 / 2 / MAP.scale;
+  MAP.yOffset = PLAYER.y + (SCREEN_HEIGHT / 2 / MAP.scale) - 50 / 2 / MAP.scale;
 }
 
 /*
@@ -328,17 +328,17 @@ int main (int, char**)
 
   while (!quit)
     {
+      if (AUTO_FOLLOW)
+        {
+          recenterOnPlayer ();
+        }
+
       while (SDL_PollEvent (&e))
         {
           // if user close window
           if (e.type == SDL_QUIT)
             {
               quit = true;
-            }
-
-          if (AUTO_FOLLOW)
-            {
-              recenterOnPlayer ();
             }
 
           // key press events
