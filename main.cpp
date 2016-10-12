@@ -107,10 +107,10 @@ void setMapSingletons (SDL_Renderer *ren, std::string zoneName)
  */
 void renderMapPoints (SDL_Renderer *ren)
 {
-  if (! MAP.isLoaded ())
-    {
-      std::string mapFile = ZONE_LIST.get (LOG_PARSER.zone);
+  std::string mapFile = ZONE_LIST.get (LOG_PARSER.zone);
 
+  if (! MAP.isLoaded () || (mapFile != "" && MAP.lastLoaded != mapFile))
+    {
       if (mapFile == "")
         {
           std::cout << "Tried finding " << LOG_PARSER.zone << std::endl;
@@ -118,12 +118,13 @@ void renderMapPoints (SDL_Renderer *ren)
           return;
         }
 
+      MAP.lastLoaded = mapFile;
       setMapSingletons (ren, mapFile + ".txt");
     }
 
   // Paint background
-  SDL_SetRenderDrawBlendMode (ren, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor (ren, 0x00, 0x00, 0x00, 0xAA);
+  //SDL_SetRenderDrawBlendMode (ren, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawColor (ren, 0x00, 0x00, 0x00, 0xFF);
   SDL_Rect rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
   if (0 != SDL_RenderFillRect (ren, &rect))
     {
@@ -425,7 +426,7 @@ int main (int, char**)
 
       // Present our render as output
       SDL_RenderClear (ren);
-      SDL_UTIL.renderTexture (background, ren, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+      //SDL_UTIL.renderTexture (background, ren, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       renderMapPoints (ren);
       renderPlayer (ren);
       SDL_UTIL.renderTexture (image, ren, 0, SCREEN_HEIGHT - 50, -1, -1);

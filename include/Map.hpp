@@ -15,6 +15,7 @@ class Map
   bool has_loaded_lines = false;
   std::vector<MapLine*> map_lines;
 public:
+  std::string lastLoaded;
   double scale = 0.15;
   int xOffset = 0;
   int yOffset = 0;
