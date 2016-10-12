@@ -9,6 +9,18 @@ EverQuest emulator/server.
 The general idea of this is that it parses your log file, and draws a
 map of the current zone you're in.
 
+## Pre-setup
+
+Make a symlink (or Shortcut for you Windows users) as follows:
+
+```
+ln -s /path/to/your/eq/map/directory/maps ./res/maps
+ln -s /path/to/your/eq/log/file.txt ./res/logs/active.log
+```
+
+The map program will read your data from active.log, and generate map
+files from the content in ./res/maps/<map-name>.txt.
+
 ## Installation/building
 Run the following (only tested on GNU/Linux so far):
 
@@ -26,8 +38,6 @@ immediately.
 
 I'll update this, but main tasks to go:
 
-- Realtime parsing of the log file
-- Dynamic zone/map change
 - Precompiled binary downloads
 - General code cleanup/refactoring
 
