@@ -5,6 +5,7 @@
 #include <sstream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <sys/types.h>
 
 #include "res_path.h"
 #include "cleanup.h"
@@ -13,6 +14,7 @@
 #include "MapLine.hpp"
 #include "SdlUtil.hpp"
 #include "LogParser.hpp"
+#include "ZoneList.hpp"
 
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
@@ -22,6 +24,7 @@ Map MAP { 0.15, 2400, 3000 };// = new Map();
 Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
 LogParser LOG_PARSER = { resPath + "logs/active.log" };
+ZoneList ZONE_LIST;
 
 /**
  * Read the current map file, and load up the points
@@ -106,7 +109,16 @@ void renderMapPoints (SDL_Renderer *ren)
 {
   if (! MAP.isLoaded ())
     {
-      setMapSingletons (ren, "tox.txt");
+      std::string mapFile = ZONE_LIST.get (LOG_PARSER.zone);
+
+      if (mapFile == "")
+        {
+          std::cout << "Tried finding " << LOG_PARSER.zone << std::endl;
+          SDL_UTIL.logSDLError (std::cout, "Zone name not found in ZoneList");
+          return;
+        }
+
+      setMapSingletons (ren, mapFile + ".txt");
     }
 
   // Paint background
@@ -309,6 +321,7 @@ int main (int, char**)
   SDL_Event e;
   bool quit = false;
 
+  LOG_PARSER.parse ();
   recenterOnPlayer ();
 
   while (!quit)

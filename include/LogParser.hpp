@@ -1,6 +1,9 @@
 #ifndef LOG_PARSER_H
 #define LOG_PARSER_H
 
+#define ZONE_MAX 50
+#define LOC_MAX 100
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -20,8 +23,8 @@ class LogParser
   std::string regex = "You have entered";
   long fileSize;
 public:
-  char *zone;
-  char *location;
+  char zone[ZONE_MAX];
+  char location[LOC_MAX];
   double x, y;
 
   LogParser (std::string fn);
@@ -127,8 +130,8 @@ void LogParser::parse ()
     }
 
   char *found;
-  char zone[50];
-  char location[100];
+  char zone[ZONE_MAX];
+  char location[LOC_MAX];
 
   do {
     c = fgets (line, 255, fp);
@@ -151,8 +154,8 @@ void LogParser::parse ()
       }
   } while (c != NULL);
 
-  this->zone = zone;
-  this->location = location;
+  strcpy (this->zone, zone);
+  strcpy (this->location, location);
   setXandY (location);
 
   printf ("Zone was '%s'\n", this->zone);
