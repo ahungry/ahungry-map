@@ -16,6 +16,8 @@
 #include "LogParser.hpp"
 #include "ZoneList.hpp"
 
+#define MOB_SIZE 6
+
 const int SCREEN_WIDTH  = 800;
 const int SCREEN_HEIGHT = 500;
 const std::string resPath = getResourcePath ();
@@ -24,7 +26,7 @@ Map MAP { 0.15, 2400, 3000 };// = new Map();
 Player PLAYER { 0, -1000 }; // On tox, near bridge at river
 SdlUtil SDL_UTIL;
 LogParser LOG_PARSER = { resPath + "logs/active.log" };
-ZoneList ZONE_LIST;
+ZoneList ZONE_LIST { resPath + "zonelist.txt" };
 
 /**
  * Read the current map file, and load up the points
@@ -39,6 +41,7 @@ void setMapSingletons (SDL_Renderer *ren, std::string zoneName)
   std::cout << "Attempt to open: " << mapFile << std::endl;
   std::ifstream infile(mapFile);
   std::string line;
+  MAP.clearLines ();
 
   while (std::getline (infile, line))
     {
@@ -107,10 +110,10 @@ void setMapSingletons (SDL_Renderer *ren, std::string zoneName)
  */
 void renderMapPoints (SDL_Renderer *ren)
 {
-  std::string mapFile = ZONE_LIST.get (LOG_PARSER.zone);
-
-  if (! MAP.isLoaded () || (mapFile != "" && MAP.lastLoaded != mapFile))
+  if (! MAP.isLoaded () || MAP.lastLoaded != LOG_PARSER.zone)
     {
+      std::string mapFile = ZONE_LIST.get (LOG_PARSER.zone);
+
       if (mapFile == "")
         {
           std::cout << "Tried finding " << LOG_PARSER.zone << std::endl;
@@ -118,7 +121,7 @@ void renderMapPoints (SDL_Renderer *ren)
           return;
         }
 
-      MAP.lastLoaded = mapFile;
+      MAP.lastLoaded = LOG_PARSER.zone;
       setMapSingletons (ren, mapFile + ".txt");
     }
 
@@ -150,7 +153,7 @@ void renderMapPoints (SDL_Renderer *ren)
         SDL_RenderDrawLine (ren, x1, y1, x2, y2);
       } else {
         SDL_SetRenderDrawColor (ren, 0x00, 0xFF, 0xFF, 0xFF);
-        SDL_Rect rect = { (int) x1, (int) y1, (int) (MAP.scale * 10), (int) (MAP.scale * 10) };
+        SDL_Rect rect = { (int) x1, (int) y1, MOB_SIZE, MOB_SIZE };
 
         if (0 != SDL_RenderFillRect (ren, &rect))
           {
@@ -188,7 +191,7 @@ void renderPlayer (SDL_Renderer *ren)
   // do not paint background or anything, as we need to preserve map line draw
   SDL_SetRenderDrawColor (ren, 0xFF, 0x00, 0x00, 0xAA);
   //SDL_Rect rect = { PLAYER.x, PLAYER.y, (int) (MAP.scale * 1000), (int) (MAP.scale * 1000) };
-  SDL_Rect rect = { x1, y1, (int) (MAP.scale * 50), (int) (MAP.scale * 50) };
+  SDL_Rect rect = { x1, y1, MOB_SIZE, MOB_SIZE };
 
   if (0 != SDL_RenderFillRect (ren, &rect))
     {

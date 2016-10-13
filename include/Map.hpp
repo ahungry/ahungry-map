@@ -28,6 +28,7 @@ public:
   double getX (int n);
   double getY (int n);
   MapLine getLine (int n);
+  void clearLines ();
 };
 
 Map::Map (double scale, int xOffset, int yOffset)
@@ -36,6 +37,12 @@ Map::Map (double scale, int xOffset, int yOffset)
   this->xOffset = xOffset;
   this->yOffset = yOffset;
   std::cout << " map init " << std::endl;
+}
+
+void Map::clearLines ()
+{
+  has_loaded_lines = false;
+  map_lines.clear ();
 }
 
 void Map::addLine (MapLine *map_line)
