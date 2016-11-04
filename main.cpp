@@ -434,7 +434,7 @@ int main (int, char**)
       renderPlayer (ren);
       SDL_UTIL.renderTexture (image, ren, 0, SCREEN_HEIGHT - 50, -1, -1);
       SDL_RenderPresent (ren);
-      //SDL_Delay (300);
+      SDL_Delay (300);
     }
 
   //cleanup (image, background, ren, win);
