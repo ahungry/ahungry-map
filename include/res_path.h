@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 /*
  * Code samples for this template taken from tutorial at:
