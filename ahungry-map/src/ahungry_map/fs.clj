@@ -10,6 +10,5 @@
       (zipmap [:t :x1 :x2 :y1 :y2 :z1 :z2 :r :g :b :a :label])))
 
 (defn parse-map-lines [file-name]
-  (->>
-   (clojure.string/split (slurp file-name) #"\r\n")
-   (map parse-line)))
+  (->> (clojure.string/split (slurp file-name) #"\r\n")
+       (map parse-line)))
