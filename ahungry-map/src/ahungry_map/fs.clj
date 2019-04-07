@@ -1,6 +1,4 @@
-(ns ahungry-map.fs
-  (:require [quil.core :as q]
-            [quil.middleware :as m]))
+(ns ahungry-map.fs)
 
 ;; Code related to parsing the files on disk.
 
