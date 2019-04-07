@@ -1,10 +1,14 @@
 (ns ahungry-map.core
-  (:require [quil.core :as q]
-            [quil.middleware :as m]))
+  (:require
+   [ahungry-map.fs :as afs]
+   [quil.core :as q]
+   [quil.middleware :as m]))
+
+(def world-map (afs/parse-map-lines "/home/mcarter/src/ahungry-map/res/maps/tutorialb.txt"))
 
 (defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 30)
+  ; Set frame rate to 1 frames per second.
+  (q/frame-rate 1)
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
@@ -29,9 +33,24 @@
     ; Move origin point to the center of the sketch.
     (q/with-translation [(/ (q/width) 2)
                          (/ (q/height) 2)]
-      ; Draw the circle.
+
+      ;; Draw map
+      (doall (map (fn [{:keys [x1 x2 y1 y2]}]
+                 (q/line (read-string x1)
+                         (read-string y1)
+                         (read-string x2)
+                         (read-string y2))) (take 300 world-map)))
+
+      ;; Draw the circle.
       (q/ellipse x y 100 100))))
 
+(defn hmm []
+  (do (map (fn [{:keys [x1 x2 y1 y2]}]
+             (prn x1 x2 y1 y2)
+             (vector (read-string x1)
+                     (read-string y1)
+                     (read-string x2)
+                     (read-string y2))) (take 3 world-map))))
 
 (q/defsketch ahungry-map
   :title "You spin my circle right round"
