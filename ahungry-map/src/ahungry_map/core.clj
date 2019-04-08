@@ -4,11 +4,17 @@
    [quil.core :as q]
    [quil.middleware :as m]))
 
+;; Some are in brewall (butcher)
+;; Some are in the dist
 (def world-map
   (afs/parse-map-lines
    (str
+    ;; "/home/mcarter/Downloads/brewall/"
     "/home/mcarter/src/ahungry-map/res/maps/"
-    (afs/get-current-map-file) ".txt")))
+    ;; (str (afs/get-current-map-file) ".txt")
+    "butcher.txt"
+    ;; "ecommons.txt"
+    )))
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
