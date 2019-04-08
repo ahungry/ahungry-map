@@ -19,7 +19,24 @@
   []
   "../res")
 
-(defn get-zonelist []
+(defn get-zonelist
+  "Get the zones in format such as:
+  [{:label \"The Forgotten Halls\" :id \"fhalls\"}]"
+  []
   (->> (clojure.string/split (slurp (str (get-resource-dir) "/zonelist.txt")) #"\n")
        (map #(clojure.string/split % #";"))
        (map #(zipmap [:label :id] %))))
+
+(defn get-logs-in-dir
+  "Get the logs in directory that appear to be an eq log."
+  [dir]
+  (let [directory (clojure.java.io/file dir)
+        files (file-seq directory)]
+    (filter #(re-matches #".*eqlog_.*\.txt$" (.toString %)) files)))
+
+(defn get-newest-log-in-dir
+  "Sort File results by last modification date."
+  [dir]
+  (->> (get-logs-in-dir dir)
+       (sort (fn [a b] (> (.lastModified a) (.lastModified b))))
+       first))
