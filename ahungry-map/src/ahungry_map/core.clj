@@ -4,7 +4,7 @@
    [quil.core :as q]
    [quil.middleware :as m]))
 
-(def world-map (afs/parse-map-lines "/home/mcarter/src/ahungry-map/res/maps/guildhall.txt"))
+(def world-map (afs/parse-map-lines "/home/mcarter/src/ahungry-map/res/maps/gfaydark.txt"))
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
@@ -13,14 +13,6 @@
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
   ; circle color and position.
-  (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
-                (when (= "L" t)
-                  (q/line (/ (read-string x1) 1)
-                          (/ (read-string y1) 1)
-                          (/ (read-string x2) 1)
-                          (/ (read-string y2) 1))
-                  (prn "Pts: " x1 y1 x2 y2)))
-              (take 3000 world-map)))
   {:color 0
    :angle 0})
 

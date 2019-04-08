@@ -13,3 +13,13 @@
 (defn parse-map-lines [file-name]
   (->> (clojure.string/split (slurp file-name) #"\r\n")
        (map parse-line)))
+
+(defn get-resource-dir
+  "Return the current resource (res/) directory."
+  []
+  "../res")
+
+(defn get-zonelist []
+  (->> (clojure.string/split (slurp (str (get-resource-dir) "/zonelist.txt")) #"\n")
+       (map #(clojure.string/split % #";"))
+       (map #(zipmap [:label :id] %))))
