@@ -4,7 +4,11 @@
    [quil.core :as q]
    [quil.middleware :as m]))
 
-(def world-map (afs/parse-map-lines "/home/mcarter/src/ahungry-map/res/maps/gfaydark.txt"))
+(def world-map
+  (afs/parse-map-lines
+   (str
+    "/home/mcarter/src/ahungry-map/res/maps/"
+    (afs/get-current-map-file) ".txt")))
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
@@ -31,10 +35,10 @@
     ;; Draw map
     (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
                   (when (= "L" t)
-                    (q/line (/ (read-string x1) 1)
-                            (/ (read-string y1) 1)
-                            (/ (read-string x2) 1)
-                            (/ (read-string y2) 1))))
+                    (q/line (/ (read-string x1) 10)
+                            (/ (read-string y1) 10)
+                            (/ (read-string x2) 10)
+                            (/ (read-string y2) 10))))
                 (take 3000 world-map))))
 
   ;; Calculate x and y coordinates of the circle.
@@ -57,16 +61,17 @@
                      (read-string x2)
                      (read-string y2))) (take 3 world-map))))
 
-(q/defsketch ahungry-map
-  :title "You spin my circle right round"
-  :size [900 900]
-  ; setup function called only once, during sketch initialization.
-  :setup setup
-  ; update-state is called on each iteration before draw-state.
-  :update update-state
-  :draw draw-state
-  :features [:keep-on-top]
-  ; This sketch uses functional-mode middleware.
-  ; Check quil wiki for more info about middlewares and particularly
-  ; fun-mode.
-  :middleware [m/fun-mode])
+(defn -main [& args]
+  (q/defsketch ahungry-map
+    :title "You spin my circle right round"
+    :size [900 900]
+                                        ; setup function called only once, during sketch initialization.
+    :setup setup
+                                        ; update-state is called on each iteration before draw-state.
+    :update update-state
+    :draw draw-state
+    :features [:keep-on-top]
+                                        ; This sketch uses functional-mode middleware.
+                                        ; Check quil wiki for more info about middlewares and particularly
+                                        ; fun-mode.
+    :middleware [m/fun-mode]))

@@ -53,3 +53,12 @@
          (filter #(re-matches #".*You have entered (.*)\." %))
          last
          parse-zone-label-from-log-line)))
+
+(defn get-zone-id-from-label [label]
+  (let [zl (get-zonelist)]
+    (first (filter #(= (:label %) label) zl))))
+
+(defn get-current-map-file []
+  (let [zone-label (get-last-entered-zone)
+        zone-file-name (:id (get-zone-id-from-label zone-label))]
+    zone-file-name))
