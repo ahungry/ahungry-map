@@ -40,3 +40,16 @@
   (->> (get-logs-in-dir dir)
        (sort (fn [a b] (> (.lastModified a) (.lastModified b))))
        first))
+
+(defn get-content-of-newest-file []
+  (slurp (get-newest-log-in-dir (str (get-resource-dir) "/log/"))))
+
+(defn parse-zone-label-from-log-line [s]
+  (last (re-find #".*You have entered (.*)\." s)))
+
+(defn get-last-entered-zone []
+  (let [content (get-content-of-newest-file)]
+    (->> (clojure.string/split content #"\r\n")
+         (filter #(re-matches #".*You have entered (.*)\." %))
+         last
+         parse-zone-label-from-log-line)))

@@ -1,4 +1,5 @@
 /bin/*
+/res/log
 /res/logs/*
 /res/maps
 /res/maps/
