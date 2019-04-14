@@ -7,17 +7,30 @@
 ;; Some are in brewall (butcher)
 ;; Some are in the dist
 (def world-map
-  (afs/parse-map-lines
-   (str
-    ;; "/home/mcarter/Downloads/brewall/"
-    "/home/mcarter/src/ahungry-map/res/maps/"
-    (str (afs/get-current-zone) ".txt")
-    ;; "butcher.txt"
-    ;; "ecommons.txt"
-    )))
+  (atom
+   (afs/parse-map-lines
+    (str
+     ;; "/home/mcarter/Downloads/brewall/"
+     "/home/mcarter/src/ahungry-map/res/maps/"
+     (str (afs/get-current-zone) ".txt")
+     ;; "butcher.txt"
+     ;; "ecommons.txt"
+     ))))
 
 (def player-position
-  (afs/get-current-position))
+  (atom
+   (afs/get-current-position)))
+
+(defn update-positions []
+  (reset! world-map
+          (afs/parse-map-lines
+           (str "/home/mcarter/src/ahungry-map/res/maps/" (afs/get-current-zone) ".txt")))
+  (reset! player-position
+          (afs/get-current-position))
+  (Thread/sleep 1000))
+
+(defn run-threads []
+  (future (while true (do (update-positions)))))
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
@@ -35,8 +48,8 @@
   ; Update sketch state by changing circle color and position.
   {:color (mod (+ (:color state) 0.7) 255)
    :angle (+ (:angle state) 0.1)
-   :x (read-string (:x player-position))
-   :y (read-string (:y player-position))})
+   :x (read-string (:x @player-position))
+   :y (read-string (:y @player-position))})
 
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
@@ -44,17 +57,20 @@
   ;; Set circle color.
   (q/fill (:color state) 255 255)
 
-  (let [scale 10]
-    (q/with-translation [(+ (/ (q/width) 2) (/ (:x state) scale))
-                         (+ (/ (q/height) 2) (/ (:y state) scale))]
-      ;; Draw map
-      (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
-                    (when (= "L" t)
-                      (q/line (/ (read-string x1) scale)
-                              (/ (read-string y1) scale)
-                              (/ (read-string x2) scale)
-                              (/ (read-string y2) scale))))
-                  (take 30000 world-map)))))
+  (q/with-translation [(/ (q/width) 2)
+                       (/ (q/height) 2)]
+    (q/ellipse 0 0 10 10)
+    (let [scale 10]
+      (q/with-translation [(+ 0 (/ (:x state) scale))
+                           (+ 0 (/ (:y state) scale))]
+        ;; Draw map
+        (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
+                      (when (= "L" t)
+                        (q/line (/ (read-string x1) scale)
+                                (/ (read-string y1) scale)
+                                (/ (read-string x2) scale)
+                                (/ (read-string y2) scale))))
+                    (take 30000 @world-map))))))
 
   ;; Calculate x and y coordinates of the circle.
   ;; (let [angle (:angle state)
@@ -74,7 +90,7 @@
              (vector (read-string x1)
                      (read-string y1)
                      (read-string x2)
-                     (read-string y2))) (take 3 world-map))))
+                     (read-string y2))) (take 3 @world-map))))
 
 (defn -main [& args]
   (q/defsketch ahungry-map
