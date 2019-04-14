@@ -17,6 +17,7 @@
      ;; "ecommons.txt"
      ))))
 
+(def scale (atom 10))
 (def player-position
   (atom
    (afs/get-current-position)))
@@ -32,15 +33,22 @@
 (defn run-threads []
   (future (while true (do (update-positions)))))
 
+(defn process-key [rk]
+  (case (str rk)
+    "o" (swap! scale * 2)
+    "i" (swap! scale / 2)
+    (prn "Unmapped key" rk)))
+
 (defn setup []
   ; Set frame rate to 1 frames per second.
-  (q/frame-rate 1)
+  (q/frame-rate 30)
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ; setup function returns initial state. It contains
   ; circle color and position.
   {:color 0
    :angle 0
+   :scale 10
    :x 0
    :y 0})
 
@@ -49,10 +57,14 @@
   {:color (mod (+ (:color state) 0.7) 255)
    :angle (+ (:angle state) 0.1)
    :world-map @world-map
+   :scale @scale
    :x (read-string (:x @player-position))
    :y (read-string (:y @player-position))})
 
 (defn draw-state [state]
+  (when (q/key-pressed?)
+    (process-key (q/raw-key)))
+
   ;; Clear the sketch by filling it with light-grey color.
   (q/background 0)
   ;; Set circle color.
@@ -61,14 +73,13 @@
   (q/with-translation [(/ (q/width) 2)
                        (/ (q/height) 2)]
     (q/ellipse 0 0 10 10)
-    (let [scale 10]
+    (let [scale (:scale state)]
       (q/with-translation [(+ 0 (/ (:x state) scale))
                            (+ 0 (/ (:y state) scale))]
         ;; Draw map
         (q/fill 100 255 200)
         (q/stroke 255)
-        (q/text "What is up my dudes" 0 0 )
-        (doall (map (fn [{:keys [t x1 x2 y1 y2 g] :as m}]
+        (doall (map (fn [{:keys [t x1 x2 y1 y2 g]}]
                       ;; Draw a basic line segment
                       (when (= "L" t)
                         (q/line (/ (read-string x1) scale)
@@ -76,7 +87,6 @@
                                 (/ (read-string x2) scale)
                                 (/ (read-string y2) scale)))
                       (when (= "P" t)
-                        (prn m)
                         (q/text (str g)
                                 (/ (read-string x1) scale)
                                 (/ (read-string y1) scale)))
