@@ -11,10 +11,13 @@
    (str
     ;; "/home/mcarter/Downloads/brewall/"
     "/home/mcarter/src/ahungry-map/res/maps/"
-    ;; (str (afs/get-current-map-file) ".txt")
-    "butcher.txt"
+    (str (afs/get-current-zone) ".txt")
+    ;; "butcher.txt"
     ;; "ecommons.txt"
     )))
+
+(def player-position
+  (afs/get-current-position))
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
@@ -24,12 +27,16 @@
   ; setup function returns initial state. It contains
   ; circle color and position.
   {:color 0
-   :angle 0})
+   :angle 0
+   :x 0
+   :y 0})
 
 (defn update-state [state]
   ; Update sketch state by changing circle color and position.
   {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+   :angle (+ (:angle state) 0.1)
+   :x (read-string (:x player-position))
+   :y (read-string (:y player-position))})
 
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
@@ -37,15 +44,17 @@
   ;; Set circle color.
   (q/fill (:color state) 255 255)
 
-  (q/with-translation [500 500]
-    ;; Draw map
-    (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
-                  (when (= "L" t)
-                    (q/line (/ (read-string x1) 10)
-                            (/ (read-string y1) 10)
-                            (/ (read-string x2) 10)
-                            (/ (read-string y2) 10))))
-                (take 3000 world-map))))
+  (let [scale 10]
+    (q/with-translation [(+ (/ (q/width) 2) (/ (:x state) scale))
+                         (+ (/ (q/height) 2) (/ (:y state) scale))]
+      ;; Draw map
+      (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
+                    (when (= "L" t)
+                      (q/line (/ (read-string x1) scale)
+                              (/ (read-string y1) scale)
+                              (/ (read-string x2) scale)
+                              (/ (read-string y2) scale))))
+                  (take 30000 world-map)))))
 
   ;; Calculate x and y coordinates of the circle.
   ;; (let [angle (:angle state)

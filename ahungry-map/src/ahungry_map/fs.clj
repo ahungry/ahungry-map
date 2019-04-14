@@ -58,7 +58,20 @@
   (let [zl (get-zonelist)]
     (first (filter #(= (:label %) label) zl))))
 
-(defn get-current-map-file []
+(defn get-current-zone []
   (let [zone-label (get-last-entered-zone)
         zone-file-name (:id (get-zone-id-from-label zone-label))]
     zone-file-name))
+
+(defn parse-position-from-log-line [s]
+  (->>
+   (re-find #".*Your Location is (.*?), (.*?), (.*)$" s)
+   (zipmap [:_ :y :x :z])))
+
+;; Your Location is 1192.57, -495.48, 3.41
+(defn get-current-position []
+  (let [content (get-content-of-newest-file)]
+    (->> (clojure.string/split content #"\r\n")
+         (filter #(re-matches #".*Your Location is.*" %))
+         last
+         parse-position-from-log-line)))
