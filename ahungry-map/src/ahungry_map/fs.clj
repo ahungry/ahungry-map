@@ -6,6 +6,8 @@
 ;; Line format is as such:
 ;; L 1186.0742, -2175.0840, 3.1260,  1215.0065, -2174.9312, 3.1260,  150, 0, 200
 ;; L -12.7163, 162.0129, 0.0020,  12.6721, 162.0129, 0.0020,  0, 0, 0
+;; Hmm, note that label ones ignore the xyz2 so would be in slot :g
+;; P 624.6537, 2031.0975, 90.6260,  0, 0, 0,  3,  to_The_Estate_of_Unrest
 (defn parse-line [s]
   (->> (clojure.string/split s #",* +")
        (zipmap [:t :x1 :y1 :z1 :x2 :y2 :z2 :r :g :b :a :label])))

@@ -48,12 +48,13 @@
   ; Update sketch state by changing circle color and position.
   {:color (mod (+ (:color state) 0.7) 255)
    :angle (+ (:angle state) 0.1)
+   :world-map @world-map
    :x (read-string (:x @player-position))
    :y (read-string (:y @player-position))})
 
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
-  (q/background 240)
+  (q/background 0)
   ;; Set circle color.
   (q/fill (:color state) 255 255)
 
@@ -64,13 +65,24 @@
       (q/with-translation [(+ 0 (/ (:x state) scale))
                            (+ 0 (/ (:y state) scale))]
         ;; Draw map
-        (doall (map (fn [{:keys [t x1 x2 y1 y2]}]
+        (q/fill 100 255 200)
+        (q/stroke 255)
+        (q/text "What is up my dudes" 0 0 )
+        (doall (map (fn [{:keys [t x1 x2 y1 y2 g] :as m}]
+                      ;; Draw a basic line segment
                       (when (= "L" t)
                         (q/line (/ (read-string x1) scale)
                                 (/ (read-string y1) scale)
                                 (/ (read-string x2) scale)
-                                (/ (read-string y2) scale))))
-                    (take 30000 @world-map))))))
+                                (/ (read-string y2) scale)))
+                      (when (= "P" t)
+                        (prn m)
+                        (q/text (str g)
+                                (/ (read-string x1) scale)
+                                (/ (read-string y1) scale)))
+                      )
+                    (:world-map state)
+                    )))))
 
   ;; Calculate x and y coordinates of the circle.
   ;; (let [angle (:angle state)
