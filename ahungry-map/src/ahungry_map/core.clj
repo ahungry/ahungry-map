@@ -43,7 +43,7 @@
 
 (defn setup []
   ; Set frame rate to 1 frames per second.
-  (q/frame-rate 1)
+  (q/frame-rate 15)
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :rgb)
   ;; (q/color-mode :hsb)
@@ -69,9 +69,6 @@
   ;; Clear the sketch by filling it with light-grey color.
   (q/background 215 215 150)
 
-  (when (q/key-pressed?)
-    (process-key (q/raw-key)))
-
   ;; Set circle color.
   (q/fill (:color state) 255 255)
 
@@ -82,8 +79,8 @@
       (q/with-translation [(+ 0 (/ (:x state) scale))
                            (+ 0 (/ (:y state) scale))]
         ;; Draw map
-        (q/fill 100 255 200)
-        (q/stroke 100)
+        (q/fill 100 55 0)
+        (q/stroke 150 100)
         (doall (map (fn [{:keys [t x1 x2 y1 y2 g]}]
                       ;; Draw a basic line segment
                       (when (= "L" t)
@@ -128,6 +125,12 @@
                                         ; update-state is called on each iteration before draw-state.
     :update update-state
     :draw draw-state
+    :key-pressed
+    (fn [state {:keys [key key-code]}]
+      (case key
+        (:o) (do (swap! scale * 2) state)
+        (:i) (do (swap! scale / 2) state)
+        state))
     :features [:keep-on-top]
                                         ; This sketch uses functional-mode middleware.
                                         ; Check quil wiki for more info about middlewares and particularly
