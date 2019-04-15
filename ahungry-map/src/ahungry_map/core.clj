@@ -22,16 +22,23 @@
   (atom
    (afs/get-current-position)))
 
-(defn update-positions []
+(defn update-player-position []
+  (reset! player-position
+          (afs/get-current-position))
+  (Thread/sleep 1e3))
+
+(defn update-zone []
   (reset! world-map
           (afs/parse-map-lines
            (str "/home/mcarter/src/ahungry-map/res/maps/" (afs/get-current-zone) ".txt")))
-  (reset! player-position
-          (afs/get-current-position))
-  (Thread/sleep 1000))
+  (Thread/sleep 10e3))
+
+(def update-player-position-future (atom nil))
+(def update-zone-future (atom nil))
 
 (defn run-threads []
-  (future (while true (do (update-positions)))))
+  (reset! update-player-position-future (future (while true (do (update-player-position)))))
+  (reset! update-zone-future (future (while true (do (update-zone))))))
 
 (defn process-key [rk]
   (case (str rk)
