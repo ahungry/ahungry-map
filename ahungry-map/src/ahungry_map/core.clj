@@ -18,6 +18,8 @@
      ))))
 
 (def scale (atom 10))
+(def offset-y (atom 0))
+(def offset-x (atom 0))
 (def player-position
   (atom
    (afs/get-current-position)))
@@ -58,6 +60,8 @@
   ; circle color and position.
   {:color 0
    :angle 0
+   :offset-y 0
+   :offset-x 0
    :scale 10
    :cycle 100
    :x 0
@@ -68,6 +72,8 @@
   {:color (mod (+ (:color state) 0.7) 255)
    :angle (+ (:angle state) 0.1)
    :world-map @world-map
+   :offset-y @offset-y
+   :offset-x @offset-x
    :scale @scale
    :x (read-string (:x @player-position))
    :y (read-string (:y @player-position))})
@@ -79,8 +85,8 @@
   ;; Set circle color.
   (q/fill (:color state) 255 255)
 
-  (q/with-translation [(/ (q/width) 2)
-                       (/ (q/height) 2)]
+  (q/with-translation [(+ (/ (q/width) 2) (:offset-x state))
+                       (+ (/ (q/height) 2) (:offset-y state))]
     (q/ellipse 0 0 10 10)
     (let [scale (:scale state)]
       (q/with-translation [(+ 0 (/ (:x state) scale))
@@ -137,6 +143,11 @@
       (case key
         (:o) (do (swap! scale * 2) state)
         (:i) (do (swap! scale / 2) state)
+        (:r) (do (reset! offset-x 0) (reset! offset-y 0) state)
+        (:up) (do (swap! offset-y + 100) state)
+        (:down) (do (swap! offset-y - 100) state)
+        (:left) (do (swap! offset-x + 100) state)
+        (:right) (do (swap! offset-x - 100) state)
         state))
     :features [:keep-on-top]
                                         ; This sketch uses functional-mode middleware.
