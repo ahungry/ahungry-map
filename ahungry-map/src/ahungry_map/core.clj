@@ -17,9 +17,6 @@
      ;; "ecommons.txt"
      ))))
 
-(def scale (atom 10))
-(def offset-y (atom 0))
-(def offset-x (atom 0))
 (def player-position
   (atom
    (afs/get-current-position)))
@@ -42,14 +39,6 @@
   (reset! update-player-position-future (future (while true (do (update-player-position)))))
   (reset! update-zone-future (future (while true (do (update-zone))))))
 
-(defn process-key [rk]
-  (case (str rk)
-    "o" (swap! scale * 2)
-    "i" (swap! scale / 2)
-    nil
-    ;; (prn "Unmapped key" rk)
-    ))
-
 (defn setup []
   ; Set frame rate to 1 frames per second.
   (q/frame-rate 15)
@@ -69,14 +58,13 @@
 
 (defn update-state [state]
   ; Update sketch state by changing circle color and position.
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)
-   :world-map @world-map
-   :offset-y @offset-y
-   :offset-x @offset-x
-   :scale @scale
-   :x (read-string (:x @player-position))
-   :y (read-string (:y @player-position))})
+  (conj
+   state
+   {:color (mod (+ (:color state) 0.7) 255)
+    :angle (+ (:angle state) 0.1)
+    :world-map @world-map
+    :x (read-string (:x @player-position))
+    :y (read-string (:y @player-position))}))
 
 (defn draw-state [state]
   ;; Clear the sketch by filling it with light-grey color.
@@ -139,15 +127,15 @@
     :update update-state
     :draw draw-state
     :key-pressed
-    (fn [state {:keys [key key-code]}]
+    (fn [state {:keys [key _key-code]}]
       (case key
-        (:o) (do (swap! scale * 2) state)
-        (:i) (do (swap! scale / 2) state)
-        (:r) (do (reset! offset-x 0) (reset! offset-y 0) state)
-        (:up) (do (swap! offset-y + 100) state)
-        (:down) (do (swap! offset-y - 100) state)
-        (:left) (do (swap! offset-x + 100) state)
-        (:right) (do (swap! offset-x - 100) state)
+        (:o) (conj state {:scale (* (:scale state) 2)})
+        (:i) (conj state {:scale (/ (:scale state) 2)})
+        (:r) (conj state {:offset-x 0 :offset-y 0 :scale 10})
+        (:up) (conj state {:offset-y (+ (:offset-y state) 100)})
+        (:down) (conj state {:offset-y (- (:offset-y state) 100)})
+        (:left) (conj state {:offset-x (+ (:offset-x state) 100)})
+        (:right) (conj state {:offset-x (- (:offset-x state) 100)})
         state))
     :features [:keep-on-top]
                                         ; This sketch uses functional-mode middleware.
