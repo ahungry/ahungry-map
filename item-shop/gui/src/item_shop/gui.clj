@@ -24,7 +24,7 @@
                      {:fx/type :list-view
                       :cell-factory (fn [i]
                                       (let [color (format "#%03x" i)]
-                                        {:style {:-fx-backround-color color}
+                                        {:style {:-fx-background-color color}
                                          :text color}))
                       :items (range 16r1000)
                       ;; :items ["one" :two]
