@@ -31,3 +31,15 @@ AND classes & 8
 LIMIT 10"
             ;; "%tolan%"
             ]))
+
+(defn best-weapons-by-class [class]
+  (let [mask (class class-map)]
+    (j/query (db) ["SELECT name, damage, delay
+, CAST(damage as float)/delay AS ratio
+, nodrop, classes
+FROM eqItems WHERE 1=1
+AND classes & ?
+ORDER BY
+CAST(damage as float)/delay
+DESC LIMIT 10"
+                   mask])))
