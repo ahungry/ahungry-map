@@ -1,3 +1,7 @@
 {:deps
- {cljfx {:mvn/version "1.2.9"}}
+ {
+  cljfx {:mvn/version "1.2.9"}
+  org.clojure/java.jdbc {:mvn/version "0.7.9"}
+  org.xerial/sqlite-jdbc {:mvn/version "3.27.2.1"}
+  }
  }
