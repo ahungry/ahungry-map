@@ -59,7 +59,8 @@
                     }
                    {:fx/type :button
                     ;; :on-action {:event/type ::set-done :id 3}
-                    :on-action (fn [_] (reset! *state "You clicked me!"))
+                    :on-action (fn [_]
+                                 (prn "Clicked the button"))
                     :text "Click me"}
                    {:fx/type :list-view
                     ;; :on-selected-item-changed (fn [_] (reset! *state "Blub"))
