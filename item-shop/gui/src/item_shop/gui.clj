@@ -5,6 +5,7 @@
 (ns item-shop.gui
   (:require
    [cljfx.api :as fx]
+   [item-shop.db :as db]
    )
   (:import
    [javafx.scene.input KeyCode KeyEvent]
@@ -22,7 +23,23 @@
     ;; ::set-done (swap! *state assoc-in [:by-id (:id event) :done] (:fx/event event))
     ;; ::set-done (reset! *state {:full event :event (:fx/event event)})
     ::set-item (swap! *state assoc-in [:item-selected] (:fx/event event))
+    ::text-changed (swap! *state assoc-in [:filter] (:fx/event event))
     ))
+
+(defn text-input [{:keys [text]}]
+  {:fx/type :text-area
+   :style {:-fx-font-family "monospace"}
+   :text text
+   :on-text-changed {:event/type ::text-changed}})
+
+(defn filter-items [reg items]
+  (filter #(re-find reg %) items))
+
+(defn get-filtered-items []
+  (let [items (:items @*state)
+        filt (:filter @*state)
+        reg (re-pattern (str "(?i)" filt))]
+    (filter-items reg items)))
 
 (defn root [{:keys [by-id typed-text]}]
   {:fx/type :stage
@@ -34,7 +51,9 @@
            :root {:fx/type :v-box
                   :alignment :center
                   :children
-                  [{:fx/type :label
+                  [
+                   {:fx/type text-input :text "Cloth"}
+                   {:fx/type :label
                     :text (str "Selected: " (:item-selected @*state))
                     ;; :text "Hello world"
                     }
@@ -56,7 +75,8 @@
                         {
                          ;; :style {:-fx-background-color "#999"}
                          :text name}))
-                    :items (:items @*state)
+                    :items (get-filtered-items)
+                    ;; :items (:items @*state)
                     ;; :items ["one" :two]
                     }]}}})
 
@@ -65,28 +85,29 @@
    :middleware (fx/wrap-map-desc assoc :fx/type root)
    :opts {:fx.opt/map-event-handler map-event-handler}))
 
-(defn xmain [& args]
+(defn main [& args]
+  (set-items (db/get-items))
   (fx/mount-renderer *state renderer))
 
-(defn main [& args]
-  (fx/on-fx-thread
-   (fx/create-component
-    {:fx/type :stage
-     :showing true
-     :title "Cljfx example"
-     :width 300
-     :height 100
-     :scene {:fx/type :scene
-             :root {:fx/type :v-box
-                    :alignment :center
-                    :children
-                    [{:fx/type :label
-                      :text "Hello world"}
-                     {:fx/type :list-view
-                      :cell-factory (fn [i]
-                                      (let [color (format "#%03x" i)]
-                                        {:style {:-fx-background-color color}
-                                         :text color}))
-                      :items (range 16r100000)
-                      ;; :items ["one" :two]
-                      }]}}})))
+;; (defn main [& args]
+;;   (fx/on-fx-thread
+;;    (fx/create-component
+;;     {:fx/type :stage
+;;      :showing true
+;;      :title "Cljfx example"
+;;      :width 300
+;;      :height 100
+;;      :scene {:fx/type :scene
+;;              :root {:fx/type :v-box
+;;                     :alignment :center
+;;                     :children
+;;                     [{:fx/type :label
+;;                       :text "Hello world"}
+;;                      {:fx/type :list-view
+;;                       :cell-factory (fn [i]
+;;                                       (let [color (format "#%03x" i)]
+;;                                         {:style {:-fx-background-color color}
+;;                                          :text color}))
+;;                       :items (range 16r100000)
+;;                       ;; :items ["one" :two]
+;;                       }]}}})))

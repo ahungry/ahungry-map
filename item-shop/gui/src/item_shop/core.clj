@@ -12,4 +12,4 @@
 
 (defn -main [& args]
   (gui/set-items (db/get-items))
-  (gui/xmain))
+  (gui/main))

@@ -29,7 +29,7 @@ WHERE 1=1
 -- AND name LIKE ?
 AND classes & 8
 ORDER BY name
-LIMIT 1000"
+LIMIT 100000"
             ;; "%tolan%"
             ]))
 
