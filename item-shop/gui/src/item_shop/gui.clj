@@ -53,7 +53,8 @@
                     ;; :items (range 16r10)
                     (fn [i]
                       (let [name (str i)]
-                        {:style {:-fx-background-color "#999"}
+                        {
+                         ;; :style {:-fx-background-color "#999"}
                          :text name}))
                     :items (:items @*state)
                     ;; :items ["one" :two]

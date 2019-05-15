@@ -28,7 +28,8 @@ FROM eqItems
 WHERE 1=1
 -- AND name LIKE ?
 AND classes & 8
-LIMIT 10"
+ORDER BY name
+LIMIT 1000"
             ;; "%tolan%"
             ]))
 
@@ -43,3 +44,6 @@ ORDER BY
 CAST(damage as float)/delay
 DESC LIMIT 10"
                    mask])))
+
+(defn get-items []
+  (map :name (get-some)))

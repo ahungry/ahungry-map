@@ -11,5 +11,5 @@
   (db/db))
 
 (defn -main [& args]
-  (prn (sanity))
-  (gui/main))
+  (gui/set-items (db/get-items))
+  (gui/xmain))
