@@ -10,14 +10,18 @@
    [javafx.scene.input KeyCode KeyEvent]
    ))
 
-(def *state (atom {}))
+(def *state (atom {:items [:a :b :c]}))
 
-;; :fx/event is the id in the list that was clicked
+(defn set-items [items]
+  (swap! *state assoc-in [:items] items))
+
+;; :fx/event is the id in the list that was clicked (actually, the list label)
 (defn map-event-handler [event]
   (prn "got an event!" event)
   (case (:event/type event)
     ;; ::set-done (swap! *state assoc-in [:by-id (:id event) :done] (:fx/event event))
-    ::set-done (reset! *state {:full event :event (:fx/event event)})
+    ;; ::set-done (reset! *state {:full event :event (:fx/event event)})
+    ::set-item (swap! *state assoc-in [:item-selected] (:fx/event event))
     ))
 
 (defn root [{:keys [by-id typed-text]}]
@@ -31,20 +35,27 @@
                   :alignment :center
                   :children
                   [{:fx/type :label
-                    :text "Hello world"}
+                    :text (str "Selected: " (:item-selected @*state))
+                    ;; :text "Hello world"
+                    }
                    {:fx/type :button
                     ;; :on-action {:event/type ::set-done :id 3}
                     :on-action (fn [_] (reset! *state "You clicked me!"))
                     :text "Click me"}
                    {:fx/type :list-view
                     ;; :on-selected-item-changed (fn [_] (reset! *state "Blub"))
-                    :on-selected-item-changed {:event/type ::set-done :id 3}
-                    :cell-factory (fn [i]
-                                    (let [color (format "#%03x" i)]
-                                      {:style {:-fx-background-color color}
-                                       ;; :on-selected-clicked {:event/type ::set-done :id 3}
-                                       :text color}))
-                    :items (range 16r10)
+                    :on-selected-item-changed {:event/type ::set-item}
+                    :cell-factory
+                    ;; (fn [i]
+                    ;;   (let [color (format "#%03x" i)]
+                    ;;     {:style {:-fx-background-color color}
+                    ;;      :text color}))
+                    ;; :items (range 16r10)
+                    (fn [i]
+                      (let [name (str i)]
+                        {:style {:-fx-background-color "#999"}
+                         :text name}))
+                    :items (:items @*state)
                     ;; :items ["one" :two]
                     }]}}})
 
