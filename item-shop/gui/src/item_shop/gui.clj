@@ -52,7 +52,7 @@
                   :alignment :center
                   :children
                   [
-                   {:fx/type text-input :text "Cloth"}
+                   {:fx/type text-input :text (:filter @*state)}
                    {:fx/type :label
                     :text (str "Selected: " (:item-selected @*state))
                     ;; :text "Hello world"
