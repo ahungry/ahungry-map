@@ -20,8 +20,8 @@
   (let [class-selected (:class-selected @*state)
         sort-selected (:sort-selected @*state)
         no-drop-selected (:no-drop-selected @*state)
-        proc-selected (:no-drop-selected @*state)
-        weapon-selected (:no-drop-selected @*state)]
+        proc-selected (:proc-selected @*state)
+        weapon-selected (:weapon-selected @*state)]
     (set-items (db/get-items-from-params
                 {:limit 10e6
                  :class class-selected

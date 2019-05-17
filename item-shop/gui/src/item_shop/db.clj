@@ -67,7 +67,7 @@ DESC LIMIT 10"
 
 (defn maybe-no-drop [no-drop]
   (if no-drop
-    " AND nodrop = 1 "
+    " AND nodrop = 0 "
     ""))
 
 (defn maybe-has-proc [has-proc]
