@@ -17,8 +17,12 @@
   (swap! *state assoc-in [:items] items))
 
 (defn set-items-from-state []
-  (let [class-selected (:class-selected @*state)]
-    (set-items (db/get-items-from-params {:class class-selected}))))
+  (let [class-selected (:class-selected @*state)
+        sort-selected (:sort-selected @*state)]
+    (set-items (db/get-items-from-params
+                {:limit 10e6
+                 :class class-selected
+                 :sort sort-selected}))))
 
 ;; :fx/event is the id in the list that was clicked (actually, the list label)
 (defn map-event-handler [event]
@@ -30,6 +34,8 @@
     ::text-changed (swap! *state assoc-in [:filter] (:fx/event event))
     ::class-change (do (swap! *state assoc-in [:class-selected] (:fx/event event))
                        (set-items-from-state))
+    ::sort-change (do (swap! *state assoc-in [:sort-selected] (:fx/event event))
+                       (set-items-from-state))
     ))
 
 (defn text-input [{:keys [text]}]
@@ -38,17 +44,23 @@
    :text text
    :on-text-changed {:event/type ::text-changed}})
 
+(defn sort-input [_]
+  {:fx/type :list-view
+   :on-selected-item-changed {:event/type ::sort-change}
+   :cell-factory
+   (fn [i]
+     (let [name (str i)]
+       {:text name}))
+   :items db/sort-options})
+
 (defn class-input [_]
-  {:fx/type :v-box
-   :children
-   [{:fx/type :list-view
-     :on-selected-item-changed {:event/type ::class-change}
-     :cell-factory
-     (fn [i]
-       (let [name (str i)]
-         {:text name}))
-     :items db/masks-class
-     }]})
+  {:fx/type :list-view
+   :on-selected-item-changed {:event/type ::class-change}
+   :cell-factory
+   (fn [i]
+     (let [name (str i)]
+       {:text name}))
+   :items db/masks-class})
 
 (defn filter-items [reg items]
   (filter #(re-find reg %) items))
@@ -72,6 +84,7 @@
                   [
                    {:fx/type text-input :text (:filter @*state)}
                    {:fx/type class-input}
+                   {:fx/type sort-input}
                    {:fx/type :label
                     :text (str "Selected: " (:item-selected @*state))
                     ;; :text "Hello world"

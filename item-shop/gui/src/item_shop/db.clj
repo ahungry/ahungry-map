@@ -13,6 +13,9 @@
    :rog 256 :shm 512 :nec 1024 :wiz 2048
    :mag 4096 :enc 8192})
 
+(def sort-options
+  ["name" "ratio"])
+
 (defn db []
   {:dbtype "sqlite"
    :dbname "../item-shop.db"})
@@ -53,17 +56,31 @@ DESC LIMIT 10"
     (class class-map)
     65535))
 
-(defn get-some-from-params [{:keys [class]}]
-  (let [mask (maybe-class-mask class)]
-    (j/query (db) ["SELECT name, damage, delay
+(defn maybe-limit [limit]
+  (or limit 10))
+
+(defn maybe-sort [sort]
+  (let [msort (or sort "name")]
+    (case msort
+      "ratio" "CAST(damage as float)/delay"
+      msort)))
+
+(defn get-some-from-params [{:keys [class limit sort]}]
+  (let [mask (maybe-class-mask class)
+        sort (maybe-sort sort)
+        limit (maybe-limit limit)]
+    (j/query
+     (db)
+     [(format "SELECT name, damage, delay
 , CAST(damage as float)/delay AS ratio
 , nodrop, classes
 FROM eqItems WHERE 1=1
 AND classes & ?
 ORDER BY
-name DESC"
-                   mask])))
+%s DESC
+LIMIT ?" sort)
+      mask limit])))
 
 (defn get-items-from-params [params]
   (let [rows (get-some-from-params params)]
-    (map :name rows)))
+    (map str rows)))
