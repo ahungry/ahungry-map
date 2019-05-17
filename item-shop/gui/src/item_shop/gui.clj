@@ -18,10 +18,16 @@
 
 (defn set-items-from-state []
   (let [class-selected (:class-selected @*state)
-        sort-selected (:sort-selected @*state)]
+        sort-selected (:sort-selected @*state)
+        no-drop-selected (:no-drop-selected @*state)
+        proc-selected (:no-drop-selected @*state)
+        weapon-selected (:no-drop-selected @*state)]
     (set-items (db/get-items-from-params
                 {:limit 10e6
                  :class class-selected
+                 :no-drop no-drop-selected
+                 :has-proc proc-selected
+                 :is-weapon weapon-selected
                  :sort sort-selected}))))
 
 ;; :fx/event is the id in the list that was clicked (actually, the list label)
@@ -35,6 +41,12 @@
     ::class-change (do (swap! *state assoc-in [:class-selected] (:fx/event event))
                        (set-items-from-state))
     ::sort-change (do (swap! *state assoc-in [:sort-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::no-drop-change (do (swap! *state assoc-in [:no-drop-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::proc-change (do (swap! *state assoc-in [:proc-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::weapon-change (do (swap! *state assoc-in [:weapon-selected] (:fx/event event))
                        (set-items-from-state))
     ))
 
@@ -64,6 +76,14 @@
        {:text name}))
    :items db/masks-class})
 
+(defn checkbox-input [{:keys [text event-type]}]
+  {:fx/type :h-box
+   :spacing 5
+   :padding 5
+   :children [{:fx/type :label :text text}
+              {:fx/type :check-box
+               :on-selected-changed {:event/type event-type}}]})
+
 (defn filter-items [reg items]
   (filter #(re-find reg %) items))
 
@@ -85,7 +105,12 @@
                   :alignment :center
                   :children
                   [
-                   {:fx/type text-input :text (:filter @*state)}
+                   {:fx/type :h-box
+                    :children
+                    [{:fx/type text-input :text (:filter @*state)}]}
+                   {:fx/type checkbox-input :text "No Drop?" :event-type ::no-drop-change}
+                   {:fx/type checkbox-input :text "Has Proc?" :event-type ::proc-change}
+                   {:fx/type checkbox-input :text "Is Weapon?" :event-type ::weapon-change}
                    {:fx/type :grid-pane
                     :children
                     [

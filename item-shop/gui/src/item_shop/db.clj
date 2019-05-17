@@ -65,20 +65,45 @@ DESC LIMIT 10"
       "ratio" "CAST(damage as float)/delay"
       msort)))
 
-(defn get-some-from-params [{:keys [class limit sort]}]
+(defn maybe-no-drop [no-drop]
+  (if no-drop
+    " AND nodrop = 1 "
+    ""))
+
+(defn maybe-has-proc [has-proc]
+  (if has-proc
+    " AND proceffect > 0 "
+    ""))
+
+(defn maybe-is-weapon [is-weapon]
+  (if is-weapon
+    " AND damage > 0 "
+    ""))
+
+(defn get-some-from-params [{:keys [class limit sort no-drop has-proc is-weapon]}]
   (let [mask (maybe-class-mask class)
         sort (maybe-sort sort)
         limit (maybe-limit limit)]
     (j/query
      (db)
-     [(format "SELECT name, damage, delay
+     [(format "SELECT eqItems.name as name, damage, delay
 , CAST(damage as float)/delay AS ratio
 , nodrop, classes
-FROM eqItems WHERE 1=1
+, eqSpells.name as proc_name
+FROM eqItems
+LEFT JOIN eqSpells ON eqItems.proceffect = eqSpells.id
+WHERE 1=1
+%s
+%s
+%s
 AND classes & ?
 ORDER BY
 %s DESC
-LIMIT ?" sort)
+LIMIT ?"
+              (maybe-no-drop no-drop)
+              (maybe-has-proc has-proc)
+              (maybe-is-weapon is-weapon)
+              sort)
       mask limit])))
 
 (defn get-items-from-params [params]
