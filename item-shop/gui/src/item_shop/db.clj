@@ -47,3 +47,23 @@ DESC LIMIT 10"
 
 (defn get-items []
   (map :name (get-some)))
+
+(defn maybe-class-mask [class]
+  (if class
+    (class class-map)
+    65535))
+
+(defn get-some-from-params [{:keys [class]}]
+  (let [mask (maybe-class-mask class)]
+    (j/query (db) ["SELECT name, damage, delay
+, CAST(damage as float)/delay AS ratio
+, nodrop, classes
+FROM eqItems WHERE 1=1
+AND classes & ?
+ORDER BY
+name DESC"
+                   mask])))
+
+(defn get-items-from-params [params]
+  (let [rows (get-some-from-params params)]
+    (map :name rows)))

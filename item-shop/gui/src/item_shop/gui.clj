@@ -16,6 +16,10 @@
 (defn set-items [items]
   (swap! *state assoc-in [:items] items))
 
+(defn set-items-from-state []
+  (let [class-selected (:class-selected @*state)]
+    (set-items (db/get-items-from-params {:class class-selected}))))
+
 ;; :fx/event is the id in the list that was clicked (actually, the list label)
 (defn map-event-handler [event]
   (prn "got an event!" event)
@@ -24,6 +28,8 @@
     ;; ::set-done (reset! *state {:full event :event (:fx/event event)})
     ::set-item (swap! *state assoc-in [:item-selected] (:fx/event event))
     ::text-changed (swap! *state assoc-in [:filter] (:fx/event event))
+    ::class-change (do (swap! *state assoc-in [:class-selected] (:fx/event event))
+                       (set-items-from-state))
     ))
 
 (defn text-input [{:keys [text]}]
@@ -31,6 +37,18 @@
    :style {:-fx-font-family "monospace"}
    :text text
    :on-text-changed {:event/type ::text-changed}})
+
+(defn class-input [_]
+  {:fx/type :v-box
+   :children
+   [{:fx/type :list-view
+     :on-selected-item-changed {:event/type ::class-change}
+     :cell-factory
+     (fn [i]
+       (let [name (str i)]
+         {:text name}))
+     :items db/masks-class
+     }]})
 
 (defn filter-items [reg items]
   (filter #(re-find reg %) items))
@@ -53,6 +71,7 @@
                   :children
                   [
                    {:fx/type text-input :text (:filter @*state)}
+                   {:fx/type class-input}
                    {:fx/type :label
                     :text (str "Selected: " (:item-selected @*state))
                     ;; :text "Hello world"
@@ -87,7 +106,7 @@
    :opts {:fx.opt/map-event-handler map-event-handler}))
 
 (defn main [& args]
-  (set-items (db/get-items))
+  (set-items-from-state)
   (fx/mount-renderer *state renderer))
 
 ;; (defn main [& args]
