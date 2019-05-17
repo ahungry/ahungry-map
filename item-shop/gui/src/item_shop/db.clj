@@ -70,6 +70,11 @@ DESC LIMIT 10"
     " AND nodrop = 0 "
     ""))
 
+(defn maybe-drop [drop]
+  (if drop
+    " AND nodrop = 1 "
+    ""))
+
 (defn maybe-has-proc [has-proc]
   (if has-proc
     " AND proceffect > 0 "
@@ -80,7 +85,7 @@ DESC LIMIT 10"
     " AND damage > 0 "
     ""))
 
-(defn get-some-from-params [{:keys [class limit sort no-drop has-proc is-weapon]}]
+(defn get-some-from-params [{:keys [class limit sort no-drop drop has-proc is-weapon]}]
   (let [mask (maybe-class-mask class)
         sort (maybe-sort sort)
         limit (maybe-limit limit)]
@@ -96,11 +101,13 @@ WHERE 1=1
 %s
 %s
 %s
+%s
 AND classes & ?
 ORDER BY
 %s DESC
 LIMIT ?"
               (maybe-no-drop no-drop)
+              (maybe-drop drop)
               (maybe-has-proc has-proc)
               (maybe-is-weapon is-weapon)
               sort)

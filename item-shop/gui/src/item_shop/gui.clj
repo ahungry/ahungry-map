@@ -20,12 +20,14 @@
   (let [class-selected (:class-selected @*state)
         sort-selected (:sort-selected @*state)
         no-drop-selected (:no-drop-selected @*state)
+        drop-selected (:drop-selected @*state)
         proc-selected (:proc-selected @*state)
         weapon-selected (:weapon-selected @*state)]
     (set-items (db/get-items-from-params
                 {:limit 10e6
                  :class class-selected
                  :no-drop no-drop-selected
+                 :drop drop-selected
                  :has-proc proc-selected
                  :is-weapon weapon-selected
                  :sort sort-selected}))))
@@ -43,6 +45,8 @@
     ::sort-change (do (swap! *state assoc-in [:sort-selected] (:fx/event event))
                        (set-items-from-state))
     ::no-drop-change (do (swap! *state assoc-in [:no-drop-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::drop-change (do (swap! *state assoc-in [:drop-selected] (:fx/event event))
                        (set-items-from-state))
     ::proc-change (do (swap! *state assoc-in [:proc-selected] (:fx/event event))
                        (set-items-from-state))
@@ -109,6 +113,7 @@
                     :children
                     [{:fx/type text-input :text (:filter @*state)}]}
                    {:fx/type checkbox-input :text "No Drop?" :event-type ::no-drop-change}
+                   {:fx/type checkbox-input :text "Droppable?" :event-type ::drop-change}
                    {:fx/type checkbox-input :text "Has Proc?" :event-type ::proc-change}
                    {:fx/type checkbox-input :text "Is Weapon?" :event-type ::weapon-change}
                    {:fx/type :grid-pane
