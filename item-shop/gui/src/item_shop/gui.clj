@@ -46,6 +46,7 @@
 
 (defn sort-input [_]
   {:fx/type :list-view
+   :max-height 60
    :on-selected-item-changed {:event/type ::sort-change}
    :cell-factory
    (fn [i]
@@ -55,6 +56,7 @@
 
 (defn class-input [_]
   {:fx/type :list-view
+   :max-height 60
    :on-selected-item-changed {:event/type ::class-change}
    :cell-factory
    (fn [i]
@@ -71,6 +73,7 @@
         reg (re-pattern (str "(?i)" filt))]
     (filter-items reg items)))
 
+
 (defn root [{:keys [by-id typed-text]}]
   {:fx/type :stage
    :showing true
@@ -83,8 +86,22 @@
                   :children
                   [
                    {:fx/type text-input :text (:filter @*state)}
-                   {:fx/type class-input}
-                   {:fx/type sort-input}
+                   {:fx/type :grid-pane
+                    :children
+                    [
+                     {:fx/type :h-box
+                      :grid-pane/column 0
+                      :grid-pane/row 0
+                      :children
+                      [
+                       {:fx/type class-input}]}
+                     {:fx/type :h-box
+                      :grid-pane/column 1
+                      :grid-pane/row 0
+                      :children
+                      [
+                       {:fx/type sort-input}]}
+                     ]}
                    {:fx/type :label
                     :text (str "Selected: " (:item-selected @*state))
                     ;; :text "Hello world"
