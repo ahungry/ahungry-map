@@ -80,24 +80,35 @@ DESC LIMIT 10"
     " AND proceffect > 0 "
     ""))
 
+(defn maybe-has-click [has-click] (if has-click " AND clickeffect > 0 " ""))
+(defn maybe-has-worn [has-worn] (if has-worn " AND worneffect > 0 " ""))
+
 (defn maybe-is-weapon [is-weapon]
   (if is-weapon
     " AND damage > 0 "
     ""))
 
-(defn get-some-from-params [{:keys [class limit sort no-drop drop has-proc is-weapon]}]
+(defn get-some-from-params [{:keys [class limit sort no-drop drop
+                                    has-proc has-click has-worn
+                                    is-weapon]}]
   (let [mask (maybe-class-mask class)
         sort (maybe-sort sort)
         limit (maybe-limit limit)]
     (j/query
      (db)
-     [(format "SELECT eqItems.name as name, damage, delay
+     [(format "SELECT e.name as name, damage, delay
 , CAST(damage as float)/delay AS ratio
 , nodrop, classes
-, eqSpells.name as proc_name
-FROM eqItems
-LEFT JOIN eqSpells ON eqItems.proceffect = eqSpells.id
+, p.name as proc_name
+, c.name as click_name
+, w.name as worn_name
+FROM eqItems e
+LEFT JOIN eqSpells p ON e.proceffect = p.id
+LEFT JOIN eqSpells c ON e.clickeffect = c.id
+LEFT JOIN eqSpells w ON e.worneffect = w.id
 WHERE 1=1
+%s
+%s
 %s
 %s
 %s
@@ -109,6 +120,8 @@ LIMIT ?"
               (maybe-no-drop no-drop)
               (maybe-drop drop)
               (maybe-has-proc has-proc)
+              (maybe-has-click has-click)
+              (maybe-has-worn has-worn)
               (maybe-is-weapon is-weapon)
               sort)
       mask limit])))

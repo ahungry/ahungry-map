@@ -22,6 +22,8 @@
         no-drop-selected (:no-drop-selected @*state)
         drop-selected (:drop-selected @*state)
         proc-selected (:proc-selected @*state)
+        click-selected (:click-selected @*state)
+        worn-selected (:worn-selected @*state)
         weapon-selected (:weapon-selected @*state)]
     (set-items (db/get-items-from-params
                 {:limit 10e6
@@ -29,6 +31,8 @@
                  :no-drop no-drop-selected
                  :drop drop-selected
                  :has-proc proc-selected
+                 :has-click click-selected
+                 :has-worn worn-selected
                  :is-weapon weapon-selected
                  :sort sort-selected}))))
 
@@ -49,6 +53,10 @@
     ::drop-change (do (swap! *state assoc-in [:drop-selected] (:fx/event event))
                        (set-items-from-state))
     ::proc-change (do (swap! *state assoc-in [:proc-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::click-change (do (swap! *state assoc-in [:click-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::worn-change (do (swap! *state assoc-in [:worn-selected] (:fx/event event))
                        (set-items-from-state))
     ::weapon-change (do (swap! *state assoc-in [:weapon-selected] (:fx/event event))
                        (set-items-from-state))
@@ -115,6 +123,8 @@
                    {:fx/type checkbox-input :text "No Drop?" :event-type ::no-drop-change}
                    {:fx/type checkbox-input :text "Droppable?" :event-type ::drop-change}
                    {:fx/type checkbox-input :text "Has Proc?" :event-type ::proc-change}
+                   {:fx/type checkbox-input :text "Has Click?" :event-type ::click-change}
+                   {:fx/type checkbox-input :text "Has Worn?" :event-type ::worn-change}
                    {:fx/type checkbox-input :text "Is Weapon?" :event-type ::weapon-change}
                    {:fx/type :grid-pane
                     :children
