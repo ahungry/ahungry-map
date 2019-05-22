@@ -24,7 +24,7 @@
 (defn update-player-position []
   (reset! player-position
           (afs/get-current-position))
-  (Thread/sleep 1e3))
+  (Thread/sleep 5e3))
 
 (defn update-zone []
   (reset! world-map
