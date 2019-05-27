@@ -1,4 +1,13 @@
-{:deps
+{
+ :paths ["src"]
+ :aliases
+ {
+  :default
+  {
+   :main-opts ["-m" "item-shop.core"
+               "-d" "src/item_shop"]}
+  }
+ :deps
  {
   cljfx {:mvn/version "1.2.9"}
   org.clojure/java.jdbc {:mvn/version "0.7.9"}

@@ -9,6 +9,8 @@
    )
   (:import
    [javafx.scene.input KeyCode KeyEvent]
+   [javafx.scene.paint Color]
+   [javafx.scene.canvas Canvas]
    ))
 
 (def *state (atom {:items [:a :b :c]}))
@@ -96,6 +98,17 @@
               {:fx/type :check-box
                :on-selected-changed {:event/type event-type}}]})
 
+(defn my-canvas [_]
+  (let [canvas (new Canvas 250 250)
+        g-ctx (.getGraphicsContext2D canvas)
+        box (fx/create-component {:fx/type :h-box})
+        ]
+    (.setFill g-ctx Color/BLUE)
+    (.fillRect g-ctx 75 75 100 100)
+    (-> (fx/instance box) .getChildren (.add canvas))
+    box
+    ))
+
 (defn filter-items [reg items]
   (filter #(re-find reg %) items))
 
@@ -104,7 +117,6 @@
         filt (:filter @*state)
         reg (re-pattern (str "(?i)" filt))]
     (filter-items reg items)))
-
 
 (defn root [{:keys [by-id typed-text]}]
   {:fx/type :stage
@@ -117,6 +129,8 @@
                   :alignment :center
                   :children
                   [
+                   {:fx/type my-canvas}
+                   (my-canvas nil)
                    {:fx/type :h-box
                     :children
                     [{:fx/type text-input :text (:filter @*state)}]}
