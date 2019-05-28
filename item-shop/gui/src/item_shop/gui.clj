@@ -13,7 +13,8 @@
    [javafx.scene.canvas Canvas]
    ))
 
-(def *state (atom {:items [:a :b :c]}))
+(def *state (atom {:items [:a :b :c]
+                   :progress 0.3}))
 
 (defn set-items [items]
   (swap! *state assoc-in [:items] items))
@@ -98,16 +99,17 @@
               {:fx/type :check-box
                :on-selected-changed {:event/type event-type}}]})
 
-(defn my-canvas [_]
-  (let [canvas (new Canvas 250 250)
-        g-ctx (.getGraphicsContext2D canvas)
-        box (fx/create-component {:fx/type :h-box})
-        ]
-    (.setFill g-ctx Color/BLUE)
-    (.fillRect g-ctx 75 75 100 100)
-    (-> (fx/instance box) .getChildren (.add canvas))
-    box
-    ))
+(defn canvas-progress-bar [{:keys [progress width height]}]
+  {:fx/type :canvas
+   :width width
+   :height height
+   :draw (fn [^Canvas canvas]
+           (doto (.getGraphicsContext2D canvas)
+             (.clearRect 0 0 width height)
+             (.setFill (Color/LIGHTGREY))
+             (.fillRoundRect 0 0 width height height height)
+             (.setFill (Color/GREEN))
+             (.fillRoundRect 0 0 (* width progress) height height height)))})
 
 (defn filter-items [reg items]
   (filter #(re-find reg %) items))
@@ -118,7 +120,7 @@
         reg (re-pattern (str "(?i)" filt))]
     (filter-items reg items)))
 
-(defn root [{:keys [by-id typed-text]}]
+(defn root [{:keys [progress]}]
   {:fx/type :stage
    :showing true
    :title "Cljfx example"
@@ -129,8 +131,16 @@
                   :alignment :center
                   :children
                   [
-                   {:fx/type my-canvas}
-                   (my-canvas nil)
+                   {:fx/type canvas-progress-bar
+                    :width 100
+                    :height 10
+                    :progress progress}
+                   {:fx/type :slider
+                    :pref-width 100
+                    :min 0
+                    :max 1
+                    :value progress
+                    :on-value-changed #(swap! *state assoc-in [:progress] %)}
                    {:fx/type :h-box
                     :children
                     [{:fx/type text-input :text (:filter @*state)}]}
