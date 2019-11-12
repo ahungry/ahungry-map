@@ -26,7 +26,7 @@
    :waist 1048576})
 
 (def sort-options
-  ["name" "ratio"])
+  ["name" "ratio" "ac"])
 
 (defn db []
   {:dbtype "sqlite"
@@ -133,6 +133,7 @@ WHERE 1=1
 %s
 AND classes & ?
 AND slots & ?
+AND p99 = 1
 ORDER BY
 %s DESC
 LIMIT ?"

@@ -77,7 +77,6 @@
 
 (defn sort-input [_]
   {:fx/type :list-view
-   :max-height 60
    :on-selected-item-changed {:event/type ::sort-change}
    :cell-factory
    (fn [i]
@@ -87,7 +86,6 @@
 
 (defn class-input [_]
   {:fx/type :list-view
-   :max-height 60
    :on-selected-item-changed {:event/type ::class-change}
    :cell-factory
    (fn [i]
@@ -97,7 +95,6 @@
 
 (defn slot-input [_]
   {:fx/type :list-view
-   :max-height 60
    :on-selected-item-changed {:event/type ::slot-change}
    :cell-factory
    (fn [i]
@@ -158,6 +155,7 @@
                    {:fx/type :h-box
                     :children
                     [{:fx/type text-input :text (:filter @*state)}]}
+
                    {:fx/type checkbox-input :text "No Drop?" :event-type ::no-drop-change}
                    {:fx/type checkbox-input :text "Droppable?" :event-type ::drop-change}
                    {:fx/type checkbox-input :text "Has Proc?" :event-type ::proc-change}
