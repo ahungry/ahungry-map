@@ -114,7 +114,10 @@ DESC LIMIT 10"
         limit (maybe-limit limit)]
     (j/query
      (db)
-     [(format "SELECT e.name as name, damage, delay
+     [(format "SELECT e.name as name
+, damage
+, delay
+, e.ac
 , CAST(damage as float)/delay AS ratio
 , nodrop, classes
 , p.name as proc_name
