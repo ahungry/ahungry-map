@@ -21,6 +21,7 @@
 
 (defn set-items-from-state []
   (let [class-selected (:class-selected @*state)
+        slot-selected (:slot-selected @*state)
         sort-selected (:sort-selected @*state)
         no-drop-selected (:no-drop-selected @*state)
         drop-selected (:drop-selected @*state)
@@ -31,6 +32,7 @@
     (set-items (db/get-items-from-params
                 {:limit 10e6
                  :class class-selected
+                 :slot slot-selected
                  :no-drop no-drop-selected
                  :drop drop-selected
                  :has-proc proc-selected
@@ -48,6 +50,8 @@
     ::set-item (swap! *state assoc-in [:item-selected] (:fx/event event))
     ::text-changed (swap! *state assoc-in [:filter] (:fx/event event))
     ::class-change (do (swap! *state assoc-in [:class-selected] (:fx/event event))
+                       (set-items-from-state))
+    ::slot-change (do (swap! *state assoc-in [:slot-selected] (:fx/event event))
                        (set-items-from-state))
     ::sort-change (do (swap! *state assoc-in [:sort-selected] (:fx/event event))
                        (set-items-from-state))
@@ -90,6 +94,16 @@
      (let [name (str i)]
        {:text name}))
    :items db/masks-class})
+
+(defn slot-input [_]
+  {:fx/type :list-view
+   :max-height 60
+   :on-selected-item-changed {:event/type ::slot-change}
+   :cell-factory
+   (fn [i]
+     (let [name (str i)]
+       {:text name}))
+   :items db/masks-slot})
 
 (defn checkbox-input [{:keys [text event-type]}]
   {:fx/type :h-box
@@ -158,7 +172,9 @@
                       :grid-pane/row 0
                       :children
                       [
-                       {:fx/type class-input}]}
+                       {:fx/type class-input}
+                       {:fx/type slot-input}
+                       ]}
                      {:fx/type :h-box
                       :grid-pane/column 1
                       :grid-pane/row 0

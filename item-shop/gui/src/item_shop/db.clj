@@ -13,6 +13,18 @@
    :rog 256 :shm 512 :nec 1024 :wiz 2048
    :mag 4096 :enc 8192})
 
+(def masks-slot
+  [:hum :ear :head :face :ear :neck :shoulders
+   :arms :back :wrist :wrist :range :hands :primary
+   :secondary :fingers :fingers :chest :legs :feet
+   :waist])
+
+(def slot-map
+  {:hum 1 :ear 2 :head 4 :face 8 :neck 32 :shoulders 64
+   :arms 128 :back 256 :wrist 512 :range 2048 :hands 4096 :primary 8192
+   :secondary 16384 :fingers 32768 :chest 131072 :legs 262144 :feet 524288
+   :waist 1048576})
+
 (def sort-options
   ["name" "ratio"])
 
@@ -56,6 +68,11 @@ DESC LIMIT 10"
     (class class-map)
     65535))
 
+(defn maybe-slot-mask [slot]
+  (if slot
+    (slot slot-map)
+    (reduce + (vals slot-map))))
+
 (defn maybe-limit [limit]
   (or limit 10))
 
@@ -88,10 +105,11 @@ DESC LIMIT 10"
     " AND damage > 0 "
     ""))
 
-(defn get-some-from-params [{:keys [class limit sort no-drop drop
+(defn get-some-from-params [{:keys [class slot limit sort no-drop drop
                                     has-proc has-click has-worn
                                     is-weapon]}]
   (let [mask (maybe-class-mask class)
+        mask-slot (maybe-slot-mask slot)
         sort (maybe-sort sort)
         limit (maybe-limit limit)]
     (j/query
@@ -114,6 +132,7 @@ WHERE 1=1
 %s
 %s
 AND classes & ?
+AND slots & ?
 ORDER BY
 %s DESC
 LIMIT ?"
@@ -124,7 +143,9 @@ LIMIT ?"
               (maybe-has-worn has-worn)
               (maybe-is-weapon is-weapon)
               sort)
-      mask limit])))
+      mask
+      mask-slot
+      limit])))
 
 (defn get-items-from-params [params]
   (let [rows (get-some-from-params params)]
