@@ -136,7 +136,7 @@ WHERE 1=1
 %s
 AND classes & ?
 AND slots & ?
-AND p99 = 1
+AND icon = 746
 ORDER BY
 %s DESC
 LIMIT ?"
