@@ -66,6 +66,9 @@
     zone-file-name))
 
 (defn parse-position-from-log-line [s]
+  (when-not s
+    (throw (ex-info "Log file does not contain any /loc output."
+                    {:causes :missing-data})))
   (->>
    (re-find #".*Your Location is (.*?), (.*?), (.*)$" s)
    (zipmap [:_ :y :x :z])))
