@@ -24,13 +24,13 @@
 (defn update-player-position []
   (reset! player-position
           (afs/get-current-position))
-  (Thread/sleep 5e3))
+  (Thread/sleep 2000))
 
 (defn update-zone []
   (reset! world-map
           (afs/parse-map-lines
            (str "/home/mcarter/src/ahungry-map/res/maps/" (afs/get-current-zone) ".txt")))
-  (Thread/sleep 10e3))
+  (Thread/sleep 5000))
 
 (def update-player-position-future (atom nil))
 (def update-zone-future (atom nil))
@@ -119,8 +119,8 @@
 
 (defn -main [& args]
   (q/defsketch ahungry-map
-    :title "You spin my circle right round"
-    :size [900 900]
+    :title "EQ Map"
+    :size [700 500]
                                         ; setup function called only once, during sketch initialization.
     :setup setup
                                         ; update-state is called on each iteration before draw-state.
@@ -132,6 +132,14 @@
         (:o) (conj state {:scale (* (:scale state) 2)})
         (:i) (conj state {:scale (/ (:scale state) 2)})
         (:r) (conj state {:offset-x 0 :offset-y 0 :scale 10})
+        (:w) (conj state {:offset-y (+ (:offset-y state) 100)})
+        (:s) (conj state {:offset-y (- (:offset-y state) 100)})
+        (:a) (conj state {:offset-x (+ (:offset-x state) 100)})
+        (:d) (conj state {:offset-x (- (:offset-x state) 100)})
+        (:k) (conj state {:offset-y (+ (:offset-y state) 100)})
+        (:j) (conj state {:offset-y (- (:offset-y state) 100)})
+        (:h) (conj state {:offset-x (+ (:offset-x state) 100)})
+        (:l) (conj state {:offset-x (- (:offset-x state) 100)})
         (:up) (conj state {:offset-y (+ (:offset-y state) 100)})
         (:down) (conj state {:offset-y (- (:offset-y state) 100)})
         (:left) (conj state {:offset-x (+ (:offset-x state) 100)})

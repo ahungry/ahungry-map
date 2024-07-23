@@ -26,6 +26,7 @@ West Commonlands;commons
 East Commonlands;ecommons
 The Erudin Palace;erudnint
 Erudin;erudnext
+Nektulos Forest;nektulos
 The Nektulos Forest;nektulos
 The Nektulos Forest;nektulos
 Sunset Home;cshome
